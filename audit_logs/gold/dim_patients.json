@@ -1,0 +1,21 @@
+{
+  "table": "dim_patients",
+  "layer": "gold",
+  "last_watermark": null,
+  "updated_at": "2026-05-31T05:59:25.010197+00:00",
+  "history": [
+    {
+      "table": "dim_patients",
+      "mode": "FULL",
+      "input_rows": 0,
+      "output_rows": 107840,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": null,
+      "status": "OK",
+      "elapsed_s": 27.82,
+      "rows_written": 107840,
+      "logged_at": "2026-05-31T05:59:25.010197+00:00"
+    }
+  ]
+}

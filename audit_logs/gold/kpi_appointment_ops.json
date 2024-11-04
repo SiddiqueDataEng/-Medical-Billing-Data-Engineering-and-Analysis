@@ -1,0 +1,21 @@
+{
+  "table": "kpi_appointment_ops",
+  "layer": "gold",
+  "last_watermark": null,
+  "updated_at": "2026-05-31T06:00:27.982477+00:00",
+  "history": [
+    {
+      "table": "kpi_appointment_ops",
+      "mode": "FULL",
+      "input_rows": 0,
+      "output_rows": 2368,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": null,
+      "status": "OK",
+      "elapsed_s": 25.39,
+      "rows_written": 2368,
+      "logged_at": "2026-05-31T06:00:27.982477+00:00"
+    }
+  ]
+}

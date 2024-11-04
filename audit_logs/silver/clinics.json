@@ -1,0 +1,47 @@
+{
+  "table": "clinics",
+  "layer": "silver",
+  "last_watermark": "2026-05-31T08:00:54.482648+00:00",
+  "updated_at": "2026-05-31T08:01:18.588097+00:00",
+  "history": [
+    {
+      "table": "clinics",
+      "mode": "FULL",
+      "input_rows": 306,
+      "output_rows": 81,
+      "dropped_rows": 225,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T04:17:20.908971+00:00",
+      "status": "OK",
+      "elapsed_s": 21.66,
+      "rows_written": 81,
+      "logged_at": "2026-05-31T04:17:30.731030+00:00"
+    },
+    {
+      "table": "clinics",
+      "mode": "FULL",
+      "input_rows": 306,
+      "output_rows": 81,
+      "dropped_rows": 225,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T05:46:45.600919+00:00",
+      "status": "OK",
+      "elapsed_s": 13.11,
+      "rows_written": 81,
+      "logged_at": "2026-05-31T05:46:54.146333+00:00"
+    },
+    {
+      "table": "clinics",
+      "mode": "FULL",
+      "input_rows": 306,
+      "output_rows": 81,
+      "dropped_rows": 225,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T08:00:54.482648+00:00",
+      "status": "OK",
+      "elapsed_s": 55.24,
+      "rows_written": 81,
+      "logged_at": "2026-05-31T08:01:18.588097+00:00"
+    }
+  ]
+}

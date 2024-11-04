@@ -1,0 +1,60 @@
+{
+  "table": "patient_insurance",
+  "layer": "bronze",
+  "last_watermark": "2026-05-31T07:48:13.736085+00:00",
+  "updated_at": "2026-05-31T07:48:39.178183+00:00",
+  "history": [
+    {
+      "table": "patient_insurance",
+      "mode": "FULL",
+      "input_rows": 530844,
+      "output_rows": 530844,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T04:06:29.394706+00:00",
+      "status": "OK",
+      "elapsed_s": 15.67,
+      "rows_written": 530844,
+      "logged_at": "2026-05-31T04:06:43.169888+00:00"
+    },
+    {
+      "table": "patient_insurance",
+      "mode": "FULL",
+      "input_rows": 530844,
+      "output_rows": 530844,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T05:30:40.705722+00:00",
+      "status": "OK",
+      "elapsed_s": 23.56,
+      "rows_written": 530844,
+      "logged_at": "2026-05-31T05:31:01.267601+00:00"
+    },
+    {
+      "table": "patient_insurance",
+      "mode": "FULL",
+      "input_rows": 530844,
+      "output_rows": 530844,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T07:00:18.952117+00:00",
+      "status": "OK",
+      "elapsed_s": 42.21,
+      "rows_written": 530844,
+      "logged_at": "2026-05-31T07:00:54.971563+00:00"
+    },
+    {
+      "table": "patient_insurance",
+      "mode": "FULL",
+      "input_rows": 530844,
+      "output_rows": 530844,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T07:48:13.736085+00:00",
+      "status": "OK",
+      "elapsed_s": 30.32,
+      "rows_written": 530844,
+      "logged_at": "2026-05-31T07:48:39.178183+00:00"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "table": "kpi_lab_abnormals",
+  "layer": "gold",
+  "last_watermark": null,
+  "updated_at": "2026-05-31T06:00:58.072947+00:00",
+  "history": [
+    {
+      "table": "kpi_lab_abnormals",
+      "mode": "FULL",
+      "input_rows": 0,
+      "output_rows": 2467,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": null,
+      "status": "OK",
+      "elapsed_s": 21.14,
+      "rows_written": 2467,
+      "logged_at": "2026-05-31T06:00:58.072947+00:00"
+    }
+  ]
+}

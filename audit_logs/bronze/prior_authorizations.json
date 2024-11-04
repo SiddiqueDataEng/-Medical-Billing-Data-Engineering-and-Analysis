@@ -1,0 +1,60 @@
+{
+  "table": "prior_authorizations",
+  "layer": "bronze",
+  "last_watermark": "2026-05-31T07:58:35.786947+00:00",
+  "updated_at": "2026-05-31T07:58:52.505704+00:00",
+  "history": [
+    {
+      "table": "prior_authorizations",
+      "mode": "FULL",
+      "input_rows": 184293,
+      "output_rows": 184293,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T04:16:42.346601+00:00",
+      "status": "OK",
+      "elapsed_s": 7.56,
+      "rows_written": 184293,
+      "logged_at": "2026-05-31T04:16:48.871459+00:00"
+    },
+    {
+      "table": "prior_authorizations",
+      "mode": "FULL",
+      "input_rows": 184293,
+      "output_rows": 184293,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T05:45:49.872784+00:00",
+      "status": "OK",
+      "elapsed_s": 13.28,
+      "rows_written": 184293,
+      "logged_at": "2026-05-31T05:46:01.351104+00:00"
+    },
+    {
+      "table": "prior_authorizations",
+      "mode": "FULL",
+      "input_rows": 184293,
+      "output_rows": 184293,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T07:36:49.994471+00:00",
+      "status": "OK",
+      "elapsed_s": 20.99,
+      "rows_written": 184293,
+      "logged_at": "2026-05-31T07:37:07.954952+00:00"
+    },
+    {
+      "table": "prior_authorizations",
+      "mode": "FULL",
+      "input_rows": 184293,
+      "output_rows": 184293,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T07:58:35.786947+00:00",
+      "status": "OK",
+      "elapsed_s": 20.27,
+      "rows_written": 184293,
+      "logged_at": "2026-05-31T07:58:52.505704+00:00"
+    }
+  ]
+}

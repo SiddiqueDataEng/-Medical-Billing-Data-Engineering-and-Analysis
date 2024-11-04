@@ -1,0 +1,60 @@
+{
+  "table": "encounters",
+  "layer": "bronze",
+  "last_watermark": "2026-05-31T07:49:47.669051+00:00",
+  "updated_at": "2026-05-31T07:50:48.015214+00:00",
+  "history": [
+    {
+      "table": "encounters",
+      "mode": "FULL",
+      "input_rows": 921472,
+      "output_rows": 921472,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T04:09:54.944945+00:00",
+      "status": "OK",
+      "elapsed_s": 159.38,
+      "rows_written": 921472,
+      "logged_at": "2026-05-31T04:12:29.569349+00:00"
+    },
+    {
+      "table": "encounters",
+      "mode": "FULL",
+      "input_rows": 921472,
+      "output_rows": 921472,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T05:35:15.720884+00:00",
+      "status": "OK",
+      "elapsed_s": 250.88,
+      "rows_written": 921472,
+      "logged_at": "2026-05-31T05:39:10.813945+00:00"
+    },
+    {
+      "table": "encounters",
+      "mode": "FULL",
+      "input_rows": 921472,
+      "output_rows": 921472,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T07:16:31.875400+00:00",
+      "status": "OK",
+      "elapsed_s": 652.74,
+      "rows_written": 921472,
+      "logged_at": "2026-05-31T07:27:12.180132+00:00"
+    },
+    {
+      "table": "encounters",
+      "mode": "FULL",
+      "input_rows": 921472,
+      "output_rows": 921472,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T07:49:47.669051+00:00",
+      "status": "OK",
+      "elapsed_s": 72.15,
+      "rows_written": 921472,
+      "logged_at": "2026-05-31T07:50:48.015214+00:00"
+    }
+  ]
+}

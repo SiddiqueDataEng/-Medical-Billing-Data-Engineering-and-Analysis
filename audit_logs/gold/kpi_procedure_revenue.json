@@ -1,0 +1,21 @@
+{
+  "table": "kpi_procedure_revenue",
+  "layer": "gold",
+  "last_watermark": null,
+  "updated_at": "2026-05-31T06:00:01.235949+00:00",
+  "history": [
+    {
+      "table": "kpi_procedure_revenue",
+      "mode": "FULL",
+      "input_rows": 0,
+      "output_rows": 99,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": null,
+      "status": "OK",
+      "elapsed_s": 16.18,
+      "rows_written": 99,
+      "logged_at": "2026-05-31T06:00:01.235949+00:00"
+    }
+  ]
+}

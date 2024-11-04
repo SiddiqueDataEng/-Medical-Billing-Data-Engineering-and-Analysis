@@ -1,0 +1,44 @@
+services:
+  airflow:
+    image: apache/airflow:2.9.3-python3.11
+    container_name: medbilling_airflow
+    user: "50000:0"
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: "sqlite:////opt/airflow/airflow.db"
+      AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT: "false"
+      AIRFLOW__WEBSERVER__SECRET_KEY: "medbilling_secret"
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
+      AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
+      JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+      SPARK_LOCAL_IP: "127.0.0.1"
+      PYSPARK_PYTHON: /usr/local/bin/python
+      PYSPARK_DRIVER_PYTHON: /usr/local/bin/python
+    volumes:
+      - ./dags:/opt/airflow/dags:ro
+      - ./plugins:/opt/airflow/plugins:ro
+      - airflow-data:/opt/airflow
+      - ..:/opt/project
+    command: >
+      bash -c "
+        airflow db migrate &&
+        airflow users create --username admin --password Admin123
+          --firstname Admin --lastname User
+          --role Admin --email admin@local.com 2>/dev/null || true &&
+        airflow scheduler &
+        exec airflow webserver --port 8080
+      "
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+volumes:
+  airflow-data:

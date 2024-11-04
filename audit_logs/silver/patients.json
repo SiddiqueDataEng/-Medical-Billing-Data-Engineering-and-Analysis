@@ -1,0 +1,47 @@
+{
+  "table": "patients",
+  "layer": "silver",
+  "last_watermark": "2026-05-31T08:01:34.642061+00:00",
+  "updated_at": "2026-05-31T08:02:04.331531+00:00",
+  "history": [
+    {
+      "table": "patients",
+      "mode": "FULL",
+      "input_rows": 408000,
+      "output_rows": 107840,
+      "dropped_rows": 300160,
+      "dq_flagged": 24134,
+      "watermark": "2026-05-31T04:17:41.181017+00:00",
+      "status": "OK",
+      "elapsed_s": 27.53,
+      "rows_written": 107840,
+      "logged_at": "2026-05-31T04:18:06.634108+00:00"
+    },
+    {
+      "table": "patients",
+      "mode": "FULL",
+      "input_rows": 408000,
+      "output_rows": 107840,
+      "dropped_rows": 300160,
+      "dq_flagged": 24134,
+      "watermark": "2026-05-31T05:47:00.543667+00:00",
+      "status": "OK",
+      "elapsed_s": 21.63,
+      "rows_written": 107840,
+      "logged_at": "2026-05-31T05:47:20.178374+00:00"
+    },
+    {
+      "table": "patients",
+      "mode": "FULL",
+      "input_rows": 408000,
+      "output_rows": 107840,
+      "dropped_rows": 300160,
+      "dq_flagged": 24134,
+      "watermark": "2026-05-31T08:01:34.642061+00:00",
+      "status": "OK",
+      "elapsed_s": 33.22,
+      "rows_written": 107840,
+      "logged_at": "2026-05-31T08:02:04.331531+00:00"
+    }
+  ]
+}

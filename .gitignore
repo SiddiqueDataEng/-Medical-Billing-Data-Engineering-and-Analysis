@@ -1,0 +1,32 @@
+﻿# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+.venv/
+venv/
+.pytest_cache/
+.vscode/
+.kiro/
+
+# Data files - too large for git
+raw_data/
+raw_data_with_issues/
+delta/
+deltax/
+checkpoints/
+
+# Airflow runtime
+airflow/airflow.db
+airflow/airflow.cfg
+airflow/logs/
+airflow/fix_config.py
+
+# Misc
+*.db
+*.log
+*.zip
+GITHUBLIST.csv
+master-config.bat
+git-backdate.bat
+ROUGH.TXT

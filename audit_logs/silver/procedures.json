@@ -1,0 +1,47 @@
+{
+  "table": "procedures",
+  "layer": "silver",
+  "last_watermark": "2026-05-31T08:05:09.790062+00:00",
+  "updated_at": "2026-05-31T08:06:13.437016+00:00",
+  "history": [
+    {
+      "table": "procedures",
+      "mode": "FULL",
+      "input_rows": 2304838,
+      "output_rows": 1175015,
+      "dropped_rows": 1129823,
+      "dq_flagged": 46809,
+      "watermark": "2026-05-31T04:26:12.382827+00:00",
+      "status": "OK",
+      "elapsed_s": 75.39,
+      "rows_written": 1175015,
+      "logged_at": "2026-05-31T04:27:26.463594+00:00"
+    },
+    {
+      "table": "procedures",
+      "mode": "FULL",
+      "input_rows": 2304838,
+      "output_rows": 1175015,
+      "dropped_rows": 1129823,
+      "dq_flagged": 46809,
+      "watermark": "2026-05-31T05:53:20.546749+00:00",
+      "status": "OK",
+      "elapsed_s": 44.73,
+      "rows_written": 1175015,
+      "logged_at": "2026-05-31T05:54:03.309607+00:00"
+    },
+    {
+      "table": "procedures",
+      "mode": "FULL",
+      "input_rows": 2304838,
+      "output_rows": 1175015,
+      "dropped_rows": 1129823,
+      "dq_flagged": 46809,
+      "watermark": "2026-05-31T08:05:09.790062+00:00",
+      "status": "OK",
+      "elapsed_s": 66.19,
+      "rows_written": 1175015,
+      "logged_at": "2026-05-31T08:06:13.437016+00:00"
+    }
+  ]
+}

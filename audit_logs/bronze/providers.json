@@ -1,0 +1,60 @@
+{
+  "table": "providers",
+  "layer": "bronze",
+  "last_watermark": "2026-05-31T07:47:11.877344+00:00",
+  "updated_at": "2026-05-31T07:47:26.454053+00:00",
+  "history": [
+    {
+      "table": "providers",
+      "mode": "FULL",
+      "input_rows": 2040,
+      "output_rows": 2040,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T04:05:59.243086+00:00",
+      "status": "OK",
+      "elapsed_s": 8.34,
+      "rows_written": 2040,
+      "logged_at": "2026-05-31T04:06:06.340773+00:00"
+    },
+    {
+      "table": "providers",
+      "mode": "FULL",
+      "input_rows": 2040,
+      "output_rows": 2040,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T05:29:54.268414+00:00",
+      "status": "OK",
+      "elapsed_s": 11.87,
+      "rows_written": 2040,
+      "logged_at": "2026-05-31T05:30:04.564550+00:00"
+    },
+    {
+      "table": "providers",
+      "mode": "FULL",
+      "input_rows": 2040,
+      "output_rows": 2040,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T06:58:54.645311+00:00",
+      "status": "OK",
+      "elapsed_s": 21.15,
+      "rows_written": 2040,
+      "logged_at": "2026-05-31T06:59:12.324212+00:00"
+    },
+    {
+      "table": "providers",
+      "mode": "FULL",
+      "input_rows": 2040,
+      "output_rows": 2040,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T07:47:11.877344+00:00",
+      "status": "OK",
+      "elapsed_s": 16.35,
+      "rows_written": 2040,
+      "logged_at": "2026-05-31T07:47:26.454053+00:00"
+    }
+  ]
+}

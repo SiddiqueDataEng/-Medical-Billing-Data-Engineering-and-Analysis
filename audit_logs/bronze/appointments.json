@@ -1,0 +1,60 @@
+{
+  "table": "appointments",
+  "layer": "bronze",
+  "last_watermark": "2026-05-31T07:48:47.251879+00:00",
+  "updated_at": "2026-05-31T07:49:34.883183+00:00",
+  "history": [
+    {
+      "table": "appointments",
+      "mode": "FULL",
+      "input_rows": 1415662,
+      "output_rows": 1415662,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T04:06:46.294436+00:00",
+      "status": "OK",
+      "elapsed_s": 186.92,
+      "rows_written": 1415662,
+      "logged_at": "2026-05-31T04:09:50.089643+00:00"
+    },
+    {
+      "table": "appointments",
+      "mode": "FULL",
+      "input_rows": 1415662,
+      "output_rows": 1415662,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T05:31:04.191980+00:00",
+      "status": "OK",
+      "elapsed_s": 227.79,
+      "rows_written": 1415662,
+      "logged_at": "2026-05-31T05:34:49.539844+00:00"
+    },
+    {
+      "table": "appointments",
+      "mode": "FULL",
+      "input_rows": 1415662,
+      "output_rows": 1415662,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T07:01:05.053779+00:00",
+      "status": "OK",
+      "elapsed_s": 921.85,
+      "rows_written": 1415662,
+      "logged_at": "2026-05-31T07:16:17.763715+00:00"
+    },
+    {
+      "table": "appointments",
+      "mode": "FULL",
+      "input_rows": 1415662,
+      "output_rows": 1415662,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T07:48:47.251879+00:00",
+      "status": "OK",
+      "elapsed_s": 54.64,
+      "rows_written": 1415662,
+      "logged_at": "2026-05-31T07:49:34.883183+00:00"
+    }
+  ]
+}

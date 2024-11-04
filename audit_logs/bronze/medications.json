@@ -1,0 +1,60 @@
+{
+  "table": "medications",
+  "layer": "bronze",
+  "last_watermark": "2026-05-31T07:57:22.446707+00:00",
+  "updated_at": "2026-05-31T07:58:31.158379+00:00",
+  "history": [
+    {
+      "table": "medications",
+      "mode": "FULL",
+      "input_rows": 1612807,
+      "output_rows": 1612807,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T04:16:14.971910+00:00",
+      "status": "OK",
+      "elapsed_s": 30.42,
+      "rows_written": 1612807,
+      "logged_at": "2026-05-31T04:16:41.305910+00:00"
+    },
+    {
+      "table": "medications",
+      "mode": "FULL",
+      "input_rows": 1612807,
+      "output_rows": 1612807,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T05:45:08.534980+00:00",
+      "status": "OK",
+      "elapsed_s": 44.58,
+      "rows_written": 1612807,
+      "logged_at": "2026-05-31T05:45:48.064000+00:00"
+    },
+    {
+      "table": "medications",
+      "mode": "FULL",
+      "input_rows": 1612807,
+      "output_rows": 1612807,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T07:35:55.921191+00:00",
+      "status": "OK",
+      "elapsed_s": 59.09,
+      "rows_written": 1612807,
+      "logged_at": "2026-05-31T07:36:46.076724+00:00"
+    },
+    {
+      "table": "medications",
+      "mode": "FULL",
+      "input_rows": 1612807,
+      "output_rows": 1612807,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T07:57:22.446707+00:00",
+      "status": "OK",
+      "elapsed_s": 83.01,
+      "rows_written": 1612807,
+      "logged_at": "2026-05-31T07:58:31.158379+00:00"
+    }
+  ]
+}

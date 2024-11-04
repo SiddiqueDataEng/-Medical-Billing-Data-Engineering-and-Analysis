@@ -1,0 +1,47 @@
+{
+  "table": "appointments",
+  "layer": "silver",
+  "last_watermark": "2026-05-31T08:02:22.266568+00:00",
+  "updated_at": "2026-05-31T08:03:09.771931+00:00",
+  "history": [
+    {
+      "table": "appointments",
+      "mode": "FULL",
+      "input_rows": 1415662,
+      "output_rows": 721710,
+      "dropped_rows": 693952,
+      "dq_flagged": 19719,
+      "watermark": "2026-05-31T04:18:13.586721+00:00",
+      "status": "OK",
+      "elapsed_s": 242.95,
+      "rows_written": 721710,
+      "logged_at": "2026-05-31T04:22:12.428815+00:00"
+    },
+    {
+      "table": "appointments",
+      "mode": "FULL",
+      "input_rows": 1415662,
+      "output_rows": 721710,
+      "dropped_rows": 693952,
+      "dq_flagged": 19723,
+      "watermark": "2026-05-31T05:47:27.712183+00:00",
+      "status": "OK",
+      "elapsed_s": 165.96,
+      "rows_written": 721710,
+      "logged_at": "2026-05-31T05:50:08.889794+00:00"
+    },
+    {
+      "table": "appointments",
+      "mode": "FULL",
+      "input_rows": 1415662,
+      "output_rows": 721710,
+      "dropped_rows": 693952,
+      "dq_flagged": 2135,
+      "watermark": "2026-05-31T08:02:22.266568+00:00",
+      "status": "OK",
+      "elapsed_s": 57.72,
+      "rows_written": 721710,
+      "logged_at": "2026-05-31T08:03:09.771931+00:00"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "table": "payers",
+  "layer": "bronze",
+  "last_watermark": "2026-05-31T07:47:28.732062+00:00",
+  "updated_at": "2026-05-31T07:47:36.416777+00:00",
+  "history": [
+    {
+      "table": "payers",
+      "mode": "FULL",
+      "input_rows": 64,
+      "output_rows": 64,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T04:06:07.286670+00:00",
+      "status": "OK",
+      "elapsed_s": 5.73,
+      "rows_written": 64,
+      "logged_at": "2026-05-31T04:06:12.073621+00:00"
+    },
+    {
+      "table": "payers",
+      "mode": "FULL",
+      "input_rows": 64,
+      "output_rows": 64,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T05:30:05.791344+00:00",
+      "status": "OK",
+      "elapsed_s": 8.64,
+      "rows_written": 64,
+      "logged_at": "2026-05-31T05:30:13.213976+00:00"
+    },
+    {
+      "table": "payers",
+      "mode": "FULL",
+      "input_rows": 64,
+      "output_rows": 64,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T06:59:16.173297+00:00",
+      "status": "OK",
+      "elapsed_s": 20.07,
+      "rows_written": 64,
+      "logged_at": "2026-05-31T06:59:33.763052+00:00"
+    },
+    {
+      "table": "payers",
+      "mode": "FULL",
+      "input_rows": 64,
+      "output_rows": 64,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T07:47:28.732062+00:00",
+      "status": "OK",
+      "elapsed_s": 9.09,
+      "rows_written": 64,
+      "logged_at": "2026-05-31T07:47:36.416777+00:00"
+    }
+  ]
+}

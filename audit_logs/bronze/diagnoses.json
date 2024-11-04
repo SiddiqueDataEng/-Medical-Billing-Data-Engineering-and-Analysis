@@ -1,0 +1,60 @@
+{
+  "table": "diagnoses",
+  "layer": "bronze",
+  "last_watermark": "2026-05-31T07:51:46.898732+00:00",
+  "updated_at": "2026-05-31T07:52:46.499072+00:00",
+  "history": [
+    {
+      "table": "diagnoses",
+      "mode": "FULL",
+      "input_rows": 2301721,
+      "output_rows": 2301721,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T04:12:48.121590+00:00",
+      "status": "OK",
+      "elapsed_s": 24.75,
+      "rows_written": 2301721,
+      "logged_at": "2026-05-31T04:13:09.553621+00:00"
+    },
+    {
+      "table": "diagnoses",
+      "mode": "FULL",
+      "input_rows": 2301721,
+      "output_rows": 2301721,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T05:39:41.155825+00:00",
+      "status": "OK",
+      "elapsed_s": 42.53,
+      "rows_written": 2301721,
+      "logged_at": "2026-05-31T05:40:19.985494+00:00"
+    },
+    {
+      "table": "diagnoses",
+      "mode": "FULL",
+      "input_rows": 2301721,
+      "output_rows": 2301721,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T07:28:01.561900+00:00",
+      "status": "OK",
+      "elapsed_s": 59.5,
+      "rows_written": 2301721,
+      "logged_at": "2026-05-31T07:28:51.986985+00:00"
+    },
+    {
+      "table": "diagnoses",
+      "mode": "FULL",
+      "input_rows": 2301721,
+      "output_rows": 2301721,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": "2026-05-31T07:51:46.898732+00:00",
+      "status": "OK",
+      "elapsed_s": 74.78,
+      "rows_written": 2301721,
+      "logged_at": "2026-05-31T07:52:46.499072+00:00"
+    }
+  ]
+}

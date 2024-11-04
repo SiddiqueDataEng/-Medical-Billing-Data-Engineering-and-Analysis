@@ -1,0 +1,47 @@
+{
+  "table": "vitals",
+  "layer": "silver",
+  "last_watermark": "2026-05-31T08:04:28.571481+00:00",
+  "updated_at": "2026-05-31T08:05:02.542553+00:00",
+  "history": [
+    {
+      "table": "vitals",
+      "mode": "FULL",
+      "input_rows": 921472,
+      "output_rows": 469770,
+      "dropped_rows": 451702,
+      "dq_flagged": 6698,
+      "watermark": "2026-05-31T04:25:42.244260+00:00",
+      "status": "OK",
+      "elapsed_s": 28.51,
+      "rows_written": 469770,
+      "logged_at": "2026-05-31T04:26:09.130235+00:00"
+    },
+    {
+      "table": "vitals",
+      "mode": "FULL",
+      "input_rows": 921472,
+      "output_rows": 469770,
+      "dropped_rows": 451702,
+      "dq_flagged": 6698,
+      "watermark": "2026-05-31T05:52:50.932821+00:00",
+      "status": "OK",
+      "elapsed_s": 27.4,
+      "rows_written": 469770,
+      "logged_at": "2026-05-31T05:53:16.687634+00:00"
+    },
+    {
+      "table": "vitals",
+      "mode": "FULL",
+      "input_rows": 921472,
+      "output_rows": 469770,
+      "dropped_rows": 451702,
+      "dq_flagged": 6698,
+      "watermark": "2026-05-31T08:04:28.571481+00:00",
+      "status": "OK",
+      "elapsed_s": 36.82,
+      "rows_written": 469770,
+      "logged_at": "2026-05-31T08:05:02.542553+00:00"
+    }
+  ]
+}

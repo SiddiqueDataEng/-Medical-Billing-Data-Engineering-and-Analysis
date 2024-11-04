@@ -1,0 +1,34 @@
+{
+  "table": "claim_lines",
+  "layer": "silver",
+  "last_watermark": "2026-05-31T05:58:13.012318+00:00",
+  "updated_at": "2026-05-31T05:58:53.025160+00:00",
+  "history": [
+    {
+      "table": "claim_lines",
+      "mode": "FULL",
+      "input_rows": 510000,
+      "output_rows": 260000,
+      "dropped_rows": 250000,
+      "dq_flagged": 935,
+      "watermark": "2026-05-31T04:32:49.353872+00:00",
+      "status": "OK",
+      "elapsed_s": 21.55,
+      "rows_written": 260000,
+      "logged_at": "2026-05-31T04:33:09.169755+00:00"
+    },
+    {
+      "table": "claim_lines",
+      "mode": "FULL",
+      "input_rows": 510000,
+      "output_rows": 260000,
+      "dropped_rows": 250000,
+      "dq_flagged": 935,
+      "watermark": "2026-05-31T05:58:13.012318+00:00",
+      "status": "OK",
+      "elapsed_s": 43.03,
+      "rows_written": 260000,
+      "logged_at": "2026-05-31T05:58:53.025160+00:00"
+    }
+  ]
+}

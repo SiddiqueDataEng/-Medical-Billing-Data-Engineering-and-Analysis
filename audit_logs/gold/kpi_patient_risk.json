@@ -1,0 +1,21 @@
+{
+  "table": "kpi_patient_risk",
+  "layer": "gold",
+  "last_watermark": null,
+  "updated_at": "2026-05-31T06:00:36.929287+00:00",
+  "history": [
+    {
+      "table": "kpi_patient_risk",
+      "mode": "FULL",
+      "input_rows": 0,
+      "output_rows": 107840,
+      "dropped_rows": 0,
+      "dq_flagged": 0,
+      "watermark": null,
+      "status": "OK",
+      "elapsed_s": 8.94,
+      "rows_written": 107840,
+      "logged_at": "2026-05-31T06:00:36.929287+00:00"
+    }
+  ]
+}
