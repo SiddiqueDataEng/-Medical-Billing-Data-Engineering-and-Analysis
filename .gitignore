@@ -1,11 +1,13 @@
-﻿# Python
+# Python
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
 .env
 .venv/
 venv/
 .pytest_cache/
+.hypothesis/
 .vscode/
 .kiro/
 
@@ -30,3 +32,6 @@ GITHUBLIST.csv
 master-config.bat
 git-backdate.bat
 ROUGH.TXT
+node_modules/
+dist/
+build/
