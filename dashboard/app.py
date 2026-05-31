@@ -202,6 +202,7 @@ with st.sidebar:
     page = st.radio("", [
         "🏠 Executive Overview",
         "💰 Revenue & Claims",
+        "🏦 Medical Billing Deep-Dive",
         "👥 Patient Demographics",
         "🔬 Clinical Operations",
         "💊 Procedures & Labs",
@@ -753,183 +754,6 @@ elif page == "👥 Patient Demographics":
         insight(f"{pct_65:.1f}% of patients are 65+ — a Medicare-heavy panel. "
                 "Ensure HCC coding accuracy and chronic condition documentation for risk adjustment.")
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  PAGE 3 — PATIENT DEMOGRAPHICS
-# ═══════════════════════════════════════════════════════════════════════════════
-
-elif page == "👥 Patient Demographics":
-    st.markdown("# 👥 Patient Demographics")
-    st.markdown("*Understanding who your patients are — age, gender, geography, lifestyle, and risk factors*")
-    st.markdown("---")
-
-    pts = load_silver("patients", ["patient_id","age","gender","race","state","zip_code",
-                                    "smoking_status","bmi_category","income_bracket",
-                                    "marital_status","preferred_language","employment_status"])
-    risk = load_gold("kpi_patient_risk")
-
-    if pts.empty:
-        st.warning("No patient data available.")
-        st.stop()
-
-    total_pts = len(pts)
-    avg_age   = pts["age"].dropna().mean()
-    pct_female = (pts["gender"].str.upper() == "FEMALE").mean() * 100 if "gender" in pts.columns else 0
-
-    high_risk = 0
-    if not risk.empty and "risk_tier" in risk.columns:
-        high_risk = (risk["risk_tier"] == "High").sum()
-
-    story("Demographics drive everything in healthcare — from care protocols to payer mix to revenue projections. "
-          "Understanding your patient population helps predict demand, allocate resources, and design targeted outreach programs.")
-
-    c1,c2,c3,c4 = st.columns(4)
-    with c1: st.markdown(kpi_card("Total Patients", fmt_num(total_pts), color=C["accent"]), unsafe_allow_html=True)
-    with c2: st.markdown(kpi_card("Average Age", f"{avg_age:.0f}", suffix=" yrs", color=C["teal"]), unsafe_allow_html=True)
-    with c3: st.markdown(kpi_card("Female Patients", f"{pct_female:.1f}", suffix="%", color=C["purple"]), unsafe_allow_html=True)
-    with c4: st.markdown(kpi_card("High-Risk Patients", fmt_num(high_risk), color=C["danger"]), unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        section("🎂 Age Distribution")
-        fig = px.histogram(pts.dropna(subset=["age"]), x="age", nbins=25,
-                           color_discrete_sequence=[C["accent"]],
-                           labels={"age":"Age","count":"Patients"})
-        fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
-                          plot_bgcolor="rgba(0,0,0,0)", height=260,
-                          margin=dict(l=0,r=0,t=10,b=0), bargap=0.05)
-        fig.update_traces(marker_line_width=0)
-        st.plotly_chart(fig, use_container_width=True)
-
-    with col2:
-        section("⚧ Gender Split")
-        g = pts["gender"].str.title().value_counts().reset_index()
-        g.columns = ["gender","count"]
-        fig = px.pie(g, values="count", names="gender", hole=0.55,
-                     color_discrete_sequence=[C["accent"], C["purple"], C["teal"]])
-        fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
-                          height=260, margin=dict(l=0,r=0,t=10,b=0))
-        st.plotly_chart(fig, use_container_width=True)
-
-    with col3:
-        section("🌍 Race / Ethnicity")
-        r = pts["race"].str.title().value_counts().head(8).reset_index()
-        r.columns = ["race","count"]
-        fig = px.bar(r, x="count", y="race", orientation="h",
-                     color="count", color_continuous_scale="Blues",
-                     labels={"count":"Patients","race":""})
-        fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
-                          plot_bgcolor="rgba(0,0,0,0)", height=260,
-                          margin=dict(l=0,r=0,t=10,b=0),
-                          yaxis=dict(categoryorder="total ascending"),
-                          coloraxis_showscale=False)
-        st.plotly_chart(fig, use_container_width=True)
-
-    col4, col5, col6 = st.columns(3)
-
-    with col4:
-        section("🚬 Smoking Status")
-        sm = pts["smoking_status"].str.title().value_counts().reset_index()
-        sm.columns = ["status","count"]
-        colors_sm = {"Never":C["success"],"Former":C["warning"],"Current":C["danger"],"Unknown":C["muted"]}
-        fig = px.pie(sm, values="count", names="status", hole=0.5,
-                     color="status", color_discrete_map=colors_sm)
-        fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
-                          height=240, margin=dict(l=0,r=0,t=10,b=0))
-        st.plotly_chart(fig, use_container_width=True)
-
-    with col5:
-        section("⚖️ BMI Category")
-        bmi = pts["bmi_category"].str.title().value_counts().reset_index()
-        bmi.columns = ["category","count"]
-        bmi_colors = {"Normal":C["success"],"Overweight":C["warning"],
-                      "Obese":C["danger"],"Morbidly Obese":"#B71C1C","Underweight":C["teal"]}
-        fig = px.bar(bmi, x="category", y="count",
-                     color="category", color_discrete_map=bmi_colors,
-                     labels={"count":"Patients","category":""})
-        fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
-                          plot_bgcolor="rgba(0,0,0,0)", height=240,
-                          margin=dict(l=0,r=0,t=10,b=0), showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
-
-    with col6:
-        section("💼 Employment Status")
-        emp = pts["employment_status"].str.title().value_counts().reset_index()
-        emp.columns = ["status","count"]
-        fig = px.pie(emp, values="count", names="status", hole=0.5,
-                     color_discrete_sequence=QUAL)
-        fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
-                          height=240, margin=dict(l=0,r=0,t=10,b=0))
-        st.plotly_chart(fig, use_container_width=True)
-
-    # Geographic distribution
-    section("🗺️ Patient Distribution by State")
-    state_counts = pts["state"].value_counts().reset_index()
-    state_counts.columns = ["state","count"]
-    fig = px.choropleth(state_counts, locations="state", locationmode="USA-states",
-                        color="count", scope="usa",
-                        color_continuous_scale="Blues",
-                        labels={"count":"Patients"})
-    fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
-                      geo_bgcolor="rgba(0,0,0,0)", height=350,
-                      margin=dict(l=0,r=0,t=10,b=0))
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Risk tier
-    if not risk.empty and "risk_tier" in risk.columns:
-        section("🎯 Patient Risk Stratification")
-        col_r1, col_r2 = st.columns([1,2])
-        with col_r1:
-            rt = risk["risk_tier"].value_counts().reset_index()
-            rt.columns = ["tier","count"]
-            tier_colors = {"High":C["danger"],"Medium":C["warning"],"Low":C["success"]}
-            fig = px.pie(rt, values="count", names="tier", hole=0.6,
-                         color="tier", color_discrete_map=tier_colors)
-            fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
-                              height=260, margin=dict(l=0,r=0,t=10,b=0))
-            st.plotly_chart(fig, use_container_width=True)
-        with col_r2:
-            if "risk_score" in risk.columns and "age" in risk.columns:
-                sample = risk.sample(min(3000, len(risk)), random_state=42)
-                fig = px.scatter(sample, x="age", y="risk_score",
-                                 color="risk_tier",
-                                 color_discrete_map=tier_colors,
-                                 opacity=0.5, size_max=4,
-                                 labels={"age":"Age","risk_score":"Risk Score","risk_tier":"Risk Tier"})
-                fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
-                                  plot_bgcolor="rgba(0,0,0,0)", height=260,
-                                  margin=dict(l=0,r=0,t=10,b=0))
-                fig.update_traces(marker_size=3)
-                st.plotly_chart(fig, use_container_width=True)
-
-        pct_high = high_risk / len(risk) * 100 if len(risk) > 0 else 0
-        if pct_high > 20:
-            alert(f"{pct_high:.1f}% of patients are High-Risk ({fmt_num(high_risk)} patients). "
-                  "Prioritise care management outreach for chronic condition management and preventive interventions.")
-        else:
-            insight(f"Risk distribution is healthy — only {pct_high:.1f}% High-Risk. "
-                    "Continue preventive care programmes to maintain this profile.")
-
-    # Income bracket
-    section("💰 Income Bracket Distribution")
-    if "income_bracket" in pts.columns:
-        inc = pts["income_bracket"].value_counts().reset_index()
-        inc.columns = ["bracket","count"]
-        fig = px.bar(inc, x="bracket", y="count",
-                     color="count", color_continuous_scale="Viridis",
-                     labels={"count":"Patients","bracket":"Income Bracket"})
-        fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
-                          plot_bgcolor="rgba(0,0,0,0)", height=240,
-                          margin=dict(l=0,r=0,t=10,b=0), coloraxis_showscale=False)
-        st.plotly_chart(fig, use_container_width=True)
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  PAGE 4 — CLINICAL OPERATIONS
-# ═══════════════════════════════════════════════════════════════════════════════
 
 elif page == "🔬 Clinical Operations":
     st.markdown("# 🔬 Clinical Operations")
@@ -1718,6 +1542,775 @@ elif page == "🏥 Facility Intelligence":
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+#  PAGE 9 — MEDICAL BILLING DEEP-DIVE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+elif page == "🏦 Medical Billing Deep-Dive":
+    st.markdown("# 🏦 Medical Billing Deep-Dive")
+    st.markdown("*Complete revenue cycle analysis: AR aging, denial management, adjustment codes, payer performance, and collection efficiency*")
+    st.markdown("---")
+
+    # ── Load data ────────────────────────────────────────────────────────────
+    cl = load_silver("claim_lines", [
+        "claim_line_id","claim_id","cpt_code","service_date","units",
+        "billed_amount","allowed_amount","paid_amount","patient_responsibility",
+        "coinsurance_amount","copay_amount","deductible_amount","adjustment_amount",
+        "adjustment_reason_code","line_status","remark_code",
+    ])
+    pa = load_silver("prior_authorizations", [
+        "auth_id","payer_id","service_type","status","denial_reason",
+        "urgency","request_date","decision_date","approved_units",
+    ])
+    proc_rev = load_gold("kpi_procedure_revenue")
+
+    if cl.empty:
+        st.warning("No claim lines data available.")
+        st.stop()
+
+    # ── Pre-process ───────────────────────────────────────────────────────────
+    cl = cl.copy()
+    cl["service_date"] = pd.to_datetime(cl["service_date"], errors="coerce")
+    cl = cl.dropna(subset=["service_date"])
+    cl["year"]  = cl["service_date"].dt.year
+    cl["month"] = cl["service_date"].dt.month
+    cl["ym"]    = cl["service_date"].dt.to_period("M").astype(str)
+    cl["days_since"] = (pd.Timestamp.now() - cl["service_date"]).dt.days
+
+    # Normalise line_status (DQ issues injected mixed case)
+    cl["status_clean"] = cl["line_status"].str.strip().str.title()
+    cl.loc[cl["status_clean"].str.contains("Paid", na=False), "status_clean"] = "Paid"
+    cl.loc[cl["status_clean"].str.contains("Denied", na=False), "status_clean"] = "Denied"
+    cl.loc[cl["status_clean"].str.contains("Pending", na=False), "status_clean"] = "Pending"
+    cl.loc[cl["status_clean"].str.contains("Rejected", na=False), "status_clean"] = "Rejected"
+    cl.loc[cl["status_clean"].str.contains("Appealed", na=False), "status_clean"] = "Appealed"
+    cl.loc[cl["status_clean"].str.contains("Void", na=False), "status_clean"] = "Void"
+    cl.loc[cl["status_clean"].str.contains("Adjusted", na=False), "status_clean"] = "Adjusted"
+
+    # AR aging buckets (outstanding = not paid/void)
+    outstanding = cl[~cl["status_clean"].isin(["Paid","Void","Adjusted"])].copy()
+    def aging_bucket(d):
+        if d <= 30:  return "0-30 days"
+        elif d <= 60: return "31-60 days"
+        elif d <= 90: return "61-90 days"
+        elif d <= 120: return "91-120 days"
+        else:         return "120+ days"
+    outstanding["aging_bucket"] = outstanding["days_since"].apply(aging_bucket)
+    BUCKET_ORDER = ["0-30 days","31-60 days","61-90 days","91-120 days","120+ days"]
+
+    # ── Headline KPIs ─────────────────────────────────────────────────────────
+    total_billed   = cl["billed_amount"].sum()
+    total_allowed  = cl["allowed_amount"].sum()
+    total_paid     = cl["paid_amount"].sum()
+    total_pt_resp  = cl["patient_responsibility"].sum()
+    total_adj      = cl["adjustment_amount"].sum()
+    total_ar       = outstanding["billed_amount"].sum()
+    denied_amt     = cl[cl["status_clean"]=="Denied"]["billed_amount"].sum()
+    collection_rt  = total_paid / total_billed * 100 if total_billed > 0 else 0
+    denial_rt      = cl[cl["status_clean"]=="Denied"]["billed_amount"].sum() / total_billed * 100 if total_billed > 0 else 0
+    adj_rt         = total_adj / total_billed * 100 if total_billed > 0 else 0
+    ar_days        = outstanding["days_since"].mean() if not outstanding.empty else 0
+
+    story("The medical billing deep-dive exposes every dollar in your revenue cycle. "
+          "From the moment a claim line is created to final payment posting, this page tracks "
+          "AR aging, denial root causes, adjustment reason codes, payer-level performance, "
+          "and the true cost of write-offs. Use this to drive denial prevention and accelerate cash flow.")
+
+    c1,c2,c3,c4,c5,c6 = st.columns(6)
+    with c1: st.markdown(kpi_card("Gross Billed",    fmt_currency(total_billed),  color=C["warning"]), unsafe_allow_html=True)
+    with c2: st.markdown(kpi_card("Net Collected",   fmt_currency(total_paid),    color=C["success"]), unsafe_allow_html=True)
+    with c3: st.markdown(kpi_card("Collection Rate", f"{collection_rt:.1f}", suffix="%",
+                                   color=C["success"] if collection_rt>=75 else C["danger"]), unsafe_allow_html=True)
+    with c4: st.markdown(kpi_card("Total AR",        fmt_currency(total_ar),      color=C["danger"]),  unsafe_allow_html=True)
+    with c5: st.markdown(kpi_card("Denial Rate",     f"{denial_rt:.1f}", suffix="%",
+                                   color=C["danger"] if denial_rt>10 else C["success"]), unsafe_allow_html=True)
+    with c6: st.markdown(kpi_card("Avg AR Days",     f"{ar_days:.0f}", suffix=" d",
+                                   color=C["danger"] if ar_days>45 else C["success"]), unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ── TAB LAYOUT ────────────────────────────────────────────────────────────
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "📊 Revenue Cycle Funnel",
+        "⏳ AR Aging",
+        "❌ Denial Analysis",
+        "🔧 Adjustment Codes",
+        "🏦 Payer Performance",
+    ])
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # TAB 1 — REVENUE CYCLE FUNNEL
+    # ─────────────────────────────────────────────────────────────────────────
+    with tab1:
+        st.markdown("### 💧 Revenue Cycle Waterfall")
+        story("Every dollar billed flows through a series of reductions before reaching your bank account. "
+              "Contractual adjustments are expected — they reflect payer contracts. "
+              "Denials and write-offs are preventable losses. Patient responsibility is collectible with the right follow-up.")
+
+        col_wf, col_comp = st.columns([3, 2])
+        with col_wf:
+            contractual_adj = total_billed - total_allowed
+            write_offs      = max(0, total_allowed - total_paid - total_pt_resp)
+            wf_vals   = [total_billed, -contractual_adj, -write_offs, -total_pt_resp, total_paid]
+            wf_labels = ["Gross Billed", "Contractual Adj.", "Denials/Write-offs", "Patient Resp.", "Net Collected"]
+            fig = go.Figure(go.Waterfall(
+                orientation="v",
+                measure=["absolute","relative","relative","relative","total"],
+                x=wf_labels, y=wf_vals,
+                connector=dict(line=dict(color="#374151", width=1)),
+                decreasing=dict(marker_color=C["danger"]),
+                increasing=dict(marker_color=C["success"]),
+                totals=dict(marker_color=C["success"]),
+                text=[fmt_currency(abs(v)) for v in wf_vals],
+                textposition="outside",
+            ))
+            fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                              plot_bgcolor="rgba(0,0,0,0)", height=340,
+                              margin=dict(l=0,r=0,t=20,b=0),
+                              yaxis=dict(showgrid=True, gridcolor="#1F2937"))
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col_comp:
+            st.markdown("#### Revenue Composition")
+            labels = ["Net Collected","Patient Resp.","Contractual Adj.","Write-offs"]
+            values = [total_paid, total_pt_resp, contractual_adj, write_offs]
+            colors = [C["success"], C["purple"], C["warning"], C["danger"]]
+            fig = go.Figure(go.Pie(labels=labels, values=values, hole=0.6,
+                                   marker_colors=colors))
+            fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                              height=200, margin=dict(l=0,r=0,t=10,b=0))
+            fig.add_annotation(text=f"<b>{fmt_currency(total_billed)}</b><br>Gross",
+                               x=0.5, y=0.5, showarrow=False, font=dict(size=12, color="white"))
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Metrics table
+            metrics = {
+                "Gross Billed":       fmt_currency(total_billed),
+                "Contractual Adj.":   fmt_currency(contractual_adj),
+                "Allowed Amount":     fmt_currency(total_allowed),
+                "Net Collected":      fmt_currency(total_paid),
+                "Patient Resp.":      fmt_currency(total_pt_resp),
+                "Write-offs":         fmt_currency(write_offs),
+                "Collection Rate":    f"{collection_rt:.1f}%",
+                "Allowed Rate":       f"{total_allowed/total_billed*100:.1f}%" if total_billed>0 else "N/A",
+            }
+            for k,v in metrics.items():
+                st.markdown(f"<div style='display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #1F2937;font-size:0.82rem'>"
+                            f"<span style='color:#9E9E9E'>{k}</span><span style='color:#FAFAFA;font-weight:600'>{v}</span></div>",
+                            unsafe_allow_html=True)
+
+        # Monthly trend
+        st.markdown("#### Monthly Revenue Trend")
+        monthly = cl.groupby("ym").agg(
+            billed=("billed_amount","sum"),
+            allowed=("allowed_amount","sum"),
+            paid=("paid_amount","sum"),
+            pt_resp=("patient_responsibility","sum"),
+        ).reset_index().sort_values("ym")
+        monthly["collection_rate"] = monthly["paid"] / monthly["billed"] * 100
+        monthly["denial_rate"]     = (monthly["billed"] - monthly["allowed"]) / monthly["billed"] * 100
+
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        fig.add_trace(go.Bar(x=monthly["ym"], y=monthly["billed"], name="Billed",
+                             marker_color=C["warning"], opacity=0.5), secondary_y=False)
+        fig.add_trace(go.Bar(x=monthly["ym"], y=monthly["paid"], name="Collected",
+                             marker_color=C["success"], opacity=0.85), secondary_y=False)
+        fig.add_trace(go.Scatter(x=monthly["ym"], y=monthly["collection_rate"],
+                                 name="Collection %", line=dict(color=C["teal"], width=2.5),
+                                 mode="lines+markers", marker_size=4), secondary_y=True)
+        fig.add_trace(go.Scatter(x=monthly["ym"], y=monthly["denial_rate"],
+                                 name="Adj. Rate %", line=dict(color=C["danger"], width=1.5, dash="dot"),
+                                 mode="lines"), secondary_y=True)
+        fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                          plot_bgcolor="rgba(0,0,0,0)", height=300,
+                          margin=dict(l=0,r=0,t=10,b=0), barmode="overlay",
+                          legend=dict(orientation="h", y=1.1),
+                          xaxis=dict(showgrid=False, tickangle=-45, nticks=18))
+        fig.update_yaxes(title_text="Amount ($)", secondary_y=False, showgrid=True, gridcolor="#1F2937")
+        fig.update_yaxes(title_text="Rate (%)", secondary_y=True, showgrid=False)
+        st.plotly_chart(fig, use_container_width=True)
+
+        # Claim line status breakdown
+        st.markdown("#### Claim Line Status — Volume & Revenue")
+        status_rev = cl.groupby("status_clean").agg(
+            count=("claim_line_id","count"),
+            billed=("billed_amount","sum"),
+            paid=("paid_amount","sum"),
+        ).reset_index().sort_values("billed", ascending=False)
+        status_rev["collection_rate"] = status_rev["paid"] / status_rev["billed"] * 100
+
+        col_s1, col_s2 = st.columns(2)
+        with col_s1:
+            sc_colors = {"Paid":C["success"],"Denied":C["danger"],"Pending":C["warning"],
+                         "Rejected":"#FF5722","Appealed":C["purple"],"Void":C["muted"],"Adjusted":C["teal"]}
+            fig = px.bar(status_rev, x="status_clean", y="billed",
+                         color="status_clean", color_discrete_map=sc_colors,
+                         text=status_rev["billed"].apply(fmt_currency),
+                         labels={"billed":"Billed Amount","status_clean":"Status"})
+            fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                              plot_bgcolor="rgba(0,0,0,0)", height=280,
+                              margin=dict(l=0,r=0,t=10,b=0), showlegend=False)
+            fig.update_traces(textposition="outside")
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col_s2:
+            fig = px.bar(status_rev, x="status_clean", y="count",
+                         color="collection_rate", color_continuous_scale="RdYlGn",
+                         range_color=[0,100],
+                         text=status_rev["count"].apply(fmt_num),
+                         labels={"count":"Claim Lines","status_clean":"Status","collection_rate":"Coll. Rate %"})
+            fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                              plot_bgcolor="rgba(0,0,0,0)", height=280,
+                              margin=dict(l=0,r=0,t=10,b=0))
+            fig.update_traces(textposition="outside")
+            st.plotly_chart(fig, use_container_width=True)
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # TAB 2 — AR AGING
+    # ─────────────────────────────────────────────────────────────────────────
+    with tab2:
+        st.markdown("### ⏳ Accounts Receivable Aging")
+        story("AR aging shows how long outstanding claims have been unpaid. "
+              "Claims over 90 days are at high risk of write-off. "
+              "The 120+ bucket is your most urgent collection priority.")
+
+        aging = outstanding.groupby("aging_bucket").agg(
+            claim_count=("claim_line_id","count"),
+            total_outstanding=("billed_amount","sum"),
+            avg_days=("days_since","mean"),
+        ).reindex(BUCKET_ORDER).reset_index()
+        aging.columns = ["bucket","claim_count","total_outstanding","avg_days"]
+
+        c1,c2,c3,c4 = st.columns(4)
+        with c1: st.markdown(kpi_card("Total AR",       fmt_currency(total_ar),                color=C["danger"]),  unsafe_allow_html=True)
+        with c2: st.markdown(kpi_card("AR Claims",      fmt_num(len(outstanding)),             color=C["warning"]), unsafe_allow_html=True)
+        with c3: st.markdown(kpi_card("Avg AR Days",    f"{ar_days:.0f}", suffix=" days",      color=C["danger"] if ar_days>45 else C["warning"]), unsafe_allow_html=True)
+        with c4:
+            over90 = outstanding[outstanding["days_since"]>90]["billed_amount"].sum()
+            st.markdown(kpi_card("90+ Day AR",  fmt_currency(over90), color=C["danger"]), unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        col_a1, col_a2 = st.columns([3,2])
+        with col_a1:
+            bucket_colors = {
+                "0-30 days":C["success"],"31-60 days":C["teal"],
+                "61-90 days":C["warning"],"91-120 days":"#FF5722","120+ days":C["danger"]
+            }
+            fig = go.Figure()
+            fig.add_trace(go.Bar(
+                x=aging["bucket"], y=aging["total_outstanding"],
+                marker_color=[bucket_colors.get(b, C["muted"]) for b in aging["bucket"]],
+                text=aging["total_outstanding"].apply(fmt_currency),
+                textposition="outside",
+                name="Outstanding",
+            ))
+            fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                              plot_bgcolor="rgba(0,0,0,0)", height=320,
+                              margin=dict(l=0,r=0,t=20,b=0),
+                              yaxis=dict(showgrid=True, gridcolor="#1F2937"),
+                              title=dict(text="Outstanding Amount by Aging Bucket", font_size=13))
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col_a2:
+            fig = go.Figure(go.Pie(
+                labels=aging["bucket"], values=aging["total_outstanding"],
+                hole=0.55,
+                marker_colors=[bucket_colors.get(b, C["muted"]) for b in aging["bucket"]],
+            ))
+            fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                              height=320, margin=dict(l=0,r=0,t=20,b=0),
+                              title=dict(text="AR Distribution", font_size=13))
+            fig.add_annotation(text=f"<b>{fmt_currency(total_ar)}</b><br>Total AR",
+                               x=0.5, y=0.5, showarrow=False, font=dict(size=11, color="white"))
+            st.plotly_chart(fig, use_container_width=True)
+
+        # AR aging table
+        st.markdown("#### AR Aging Summary Table")
+        aging_display = aging.copy()
+        aging_display["total_outstanding"] = aging_display["total_outstanding"].apply(fmt_currency)
+        aging_display["claim_count"]       = aging_display["claim_count"].apply(fmt_num)
+        aging_display["avg_days"]          = aging_display["avg_days"].apply(lambda x: f"{x:.0f} days")
+        aging_display["pct_of_ar"]         = (outstanding.groupby("aging_bucket")["billed_amount"].sum()
+                                               .reindex(BUCKET_ORDER) / total_ar * 100).apply(lambda x: f"{x:.1f}%").values
+        aging_display.columns = ["Aging Bucket","Claim Lines","Outstanding Amount","Avg Days","% of Total AR"]
+        st.dataframe(aging_display, use_container_width=True, hide_index=True)
+
+        # Monthly AR trend
+        st.markdown("#### Monthly Outstanding AR Trend")
+        monthly_ar = outstanding.groupby("ym").agg(
+            outstanding=("billed_amount","sum"),
+            count=("claim_line_id","count"),
+        ).reset_index().sort_values("ym").tail(24)
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        fig.add_trace(go.Bar(x=monthly_ar["ym"], y=monthly_ar["outstanding"],
+                             name="Outstanding", marker_color=C["danger"], opacity=0.7), secondary_y=False)
+        fig.add_trace(go.Scatter(x=monthly_ar["ym"], y=monthly_ar["count"],
+                                 name="Claim Count", line=dict(color=C["warning"], width=2),
+                                 mode="lines+markers", marker_size=4), secondary_y=True)
+        fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                          plot_bgcolor="rgba(0,0,0,0)", height=260,
+                          margin=dict(l=0,r=0,t=10,b=0),
+                          legend=dict(orientation="h", y=1.1),
+                          xaxis=dict(showgrid=False, tickangle=-45))
+        fig.update_yaxes(title_text="Outstanding ($)", secondary_y=False, showgrid=True, gridcolor="#1F2937")
+        fig.update_yaxes(title_text="Claim Lines", secondary_y=True, showgrid=False)
+        st.plotly_chart(fig, use_container_width=True)
+
+        over90_pct = over90 / total_ar * 100 if total_ar > 0 else 0
+        if over90_pct > 30:
+            alert(f"{over90_pct:.1f}% of AR ({fmt_currency(over90)}) is over 90 days old. "
+                  "Immediate action required: assign dedicated collectors, escalate to secondary payers, "
+                  "and review timely filing limits before claims expire.")
+        else:
+            insight(f"AR aging profile is healthy — only {over90_pct:.1f}% over 90 days. "
+                    f"Average AR days of {ar_days:.0f} is within acceptable range.")
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # TAB 3 — DENIAL ANALYSIS
+    # ─────────────────────────────────────────────────────────────────────────
+    with tab3:
+        st.markdown("### ❌ Denial Analysis")
+        story("Denials are the single biggest controllable revenue leakage in medical billing. "
+              "Every denial has a root cause — administrative, clinical, or contractual. "
+              "Fixing the top 3 denial reasons typically recovers 60-70% of denied revenue.")
+
+        denied_cl = cl[cl["status_clean"] == "Denied"].copy()
+        total_denied_amt   = denied_cl["billed_amount"].sum()
+        total_denied_count = len(denied_cl)
+        appealed_cl        = cl[cl["status_clean"] == "Appealed"]
+        appeal_rate        = len(appealed_cl) / total_denied_count * 100 if total_denied_count > 0 else 0
+
+        c1,c2,c3,c4 = st.columns(4)
+        with c1: st.markdown(kpi_card("Denied Amount",  fmt_currency(total_denied_amt),   color=C["danger"]),  unsafe_allow_html=True)
+        with c2: st.markdown(kpi_card("Denied Claims",  fmt_num(total_denied_count),       color=C["danger"]),  unsafe_allow_html=True)
+        with c3: st.markdown(kpi_card("Denial Rate",    f"{denial_rt:.1f}", suffix="%",   color=C["danger"] if denial_rt>10 else C["success"]), unsafe_allow_html=True)
+        with c4: st.markdown(kpi_card("Appeal Rate",    f"{appeal_rate:.1f}", suffix="%", color=C["warning"]), unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # Denial by CPT code
+        col_d1, col_d2 = st.columns(2)
+        with col_d1:
+            st.markdown("#### Top 15 Denied CPT Codes by Amount")
+            denied_cpt = denied_cl.groupby("cpt_code").agg(
+                denied_amount=("billed_amount","sum"),
+                denied_count=("claim_line_id","count"),
+            ).reset_index().nlargest(15,"denied_amount")
+            denied_cpt["denial_rate_cpt"] = denied_cpt["denied_count"] / \
+                cl.groupby("cpt_code")["claim_line_id"].count().reindex(denied_cpt["cpt_code"]).values * 100
+            fig = px.bar(denied_cpt.sort_values("denied_amount"),
+                         x="denied_amount", y="cpt_code", orientation="h",
+                         color="denial_rate_cpt", color_continuous_scale="RdYlGn_r",
+                         range_color=[0,50],
+                         text=denied_cpt.sort_values("denied_amount")["denied_amount"].apply(fmt_currency),
+                         labels={"denied_amount":"Denied Amount","cpt_code":"CPT Code","denial_rate_cpt":"Denial Rate %"})
+            fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                              plot_bgcolor="rgba(0,0,0,0)", height=380,
+                              margin=dict(l=0,r=0,t=10,b=0))
+            fig.update_traces(textposition="outside")
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col_d2:
+            st.markdown("#### Denial Trend — Monthly")
+            monthly_denial = cl.groupby("ym").agg(
+                total=("billed_amount","sum"),
+                denied=("billed_amount", lambda x: x[cl.loc[x.index,"status_clean"]=="Denied"].sum()),
+            ).reset_index().sort_values("ym")
+            monthly_denial["denial_rate"] = monthly_denial["denied"] / monthly_denial["total"] * 100
+            fig = make_subplots(specs=[[{"secondary_y": True}]])
+            fig.add_trace(go.Bar(x=monthly_denial["ym"], y=monthly_denial["denied"],
+                                 name="Denied $", marker_color=C["danger"], opacity=0.8), secondary_y=False)
+            fig.add_trace(go.Scatter(x=monthly_denial["ym"], y=monthly_denial["denial_rate"],
+                                     name="Denial Rate %", line=dict(color=C["warning"], width=2.5),
+                                     mode="lines+markers", marker_size=4), secondary_y=True)
+            fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                              plot_bgcolor="rgba(0,0,0,0)", height=380,
+                              margin=dict(l=0,r=0,t=10,b=0),
+                              legend=dict(orientation="h", y=1.1),
+                              xaxis=dict(showgrid=False, tickangle=-45, nticks=12))
+            fig.update_yaxes(title_text="Denied Amount ($)", secondary_y=False, showgrid=True, gridcolor="#1F2937")
+            fig.update_yaxes(title_text="Denial Rate (%)", secondary_y=True, showgrid=False)
+            st.plotly_chart(fig, use_container_width=True)
+
+        # Prior auth denial reasons
+        if not pa.empty and "denial_reason" in pa.columns:
+            st.markdown("#### Prior Auth Denial Reasons")
+            pa_denied = pa[pa["status"]=="DENIED"].copy()
+            if not pa_denied.empty:
+                dr = pa_denied["denial_reason"].value_counts().reset_index()
+                dr.columns = ["reason","count"]
+                dr["pct"] = dr["count"] / dr["count"].sum() * 100
+
+                col_dr1, col_dr2 = st.columns([2,1])
+                with col_dr1:
+                    fig = px.bar(dr, x="count", y="reason", orientation="h",
+                                 color="pct", color_continuous_scale="Reds",
+                                 text=dr["pct"].apply(lambda x: f"{x:.1f}%"),
+                                 labels={"count":"Denials","reason":"Denial Reason","pct":"% of Denials"})
+                    fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                                      plot_bgcolor="rgba(0,0,0,0)", height=260,
+                                      margin=dict(l=0,r=0,t=10,b=0),
+                                      yaxis=dict(categoryorder="total ascending"),
+                                      coloraxis_showscale=False)
+                    fig.update_traces(textposition="outside")
+                    st.plotly_chart(fig, use_container_width=True)
+
+                with col_dr2:
+                    fig = px.pie(dr, values="count", names="reason", hole=0.5,
+                                 color_discrete_sequence=px.colors.sequential.Reds_r[:len(dr)])
+                    fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                                      height=260, margin=dict(l=0,r=0,t=10,b=0))
+                    st.plotly_chart(fig, use_container_width=True)
+
+        # Urgency vs denial rate
+        if not pa.empty and "urgency" in pa.columns:
+            st.markdown("#### Auth Denial Rate by Urgency Level")
+            pa_clean = pa.copy()
+            pa_clean["urgency_clean"] = pa_clean["urgency"].str.strip().str.title()
+            pa_clean.loc[pa_clean["urgency_clean"].str.contains("Routine", na=False), "urgency_clean"] = "Routine"
+            urg = pa_clean.groupby("urgency_clean").agg(
+                total=("auth_id","count"),
+                denied=("status", lambda x: (x=="DENIED").sum()),
+            ).reset_index()
+            urg["denial_rate"] = urg["denied"] / urg["total"] * 100
+            urg = urg[urg["total"] >= 100]
+            fig = px.bar(urg.sort_values("denial_rate", ascending=False),
+                         x="urgency_clean", y="denial_rate",
+                         color="denial_rate", color_continuous_scale="RdYlGn_r",
+                         range_color=[0,30],
+                         text=urg.sort_values("denial_rate",ascending=False)["denial_rate"].apply(lambda x: f"{x:.1f}%"),
+                         labels={"urgency_clean":"Urgency","denial_rate":"Denial Rate %"})
+            fig.add_hline(y=15, line_dash="dash", line_color=C["warning"],
+                          annotation_text="15% threshold")
+            fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                              plot_bgcolor="rgba(0,0,0,0)", height=240,
+                              margin=dict(l=0,r=0,t=10,b=0), coloraxis_showscale=False)
+            fig.update_traces(textposition="outside")
+            st.plotly_chart(fig, use_container_width=True)
+
+        top_denied_cpt = denied_cpt.iloc[0]["cpt_code"] if not denied_cpt.empty else "N/A"
+        if denial_rt > 10:
+            alert(f"Denial rate of {denial_rt:.1f}% ({fmt_currency(total_denied_amt)} denied). "
+                  f"Top denied CPT: {top_denied_cpt}. "
+                  "Implement pre-submission eligibility checks and prior auth verification to reduce front-end denials.")
+        else:
+            insight(f"Denial rate of {denial_rt:.1f}% is within the 10% industry benchmark. "
+                    f"Focus on the {fmt_currency(total_denied_amt)} in denied claims for appeal opportunities.")
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # TAB 4 — ADJUSTMENT CODES
+    # ─────────────────────────────────────────────────────────────────────────
+    with tab4:
+        st.markdown("### 🔧 Adjustment Reason Code Analysis")
+        story("Adjustment reason codes (CARC) explain why a claim was paid differently than billed. "
+              "CO codes = contractual obligations (payer responsibility). "
+              "PR codes = patient responsibility. OA codes = other adjustments. "
+              "High CO-45 volume means charges exceed fee schedule — review your chargemaster.")
+
+        # CARC descriptions
+        carc_desc = {
+            "CO-4":  "Inconsistent Modifier",
+            "CO-11": "Diagnosis Inconsistent with Procedure",
+            "CO-16": "Claim Lacks Information",
+            "CO-22": "Coordination of Benefits",
+            "CO-45": "Charge Exceeds Fee Schedule",
+            "CO-97": "Service Included in Another Service",
+            "CO-50": "Non-Covered Service",
+            "CO-29": "Timely Filing Exceeded",
+            "OA-23": "Payment Adjusted — Timely Filing",
+            "PR-1":  "Deductible Amount",
+            "PR-2":  "Coinsurance Amount",
+            "PR-3":  "Copay Amount",
+        }
+
+        adj_cl = cl[cl["adjustment_reason_code"].notna() & (cl["adjustment_reason_code"] != "")].copy()
+        adj_cl["adj_code_clean"] = adj_cl["adjustment_reason_code"].str.strip().str.upper()
+        adj_cl["adj_category"] = adj_cl["adj_code_clean"].apply(
+            lambda x: "Contractual (CO)" if str(x).startswith("CO") else
+                      "Patient Resp. (PR)" if str(x).startswith("PR") else
+                      "Other (OA)" if str(x).startswith("OA") else "Unknown"
+        )
+        adj_cl["adj_description"] = adj_cl["adj_code_clean"].map(carc_desc).fillna("Other Adjustment")
+
+        total_adj_amt = adj_cl["adjustment_amount"].sum()
+        co_amt = adj_cl[adj_cl["adj_category"]=="Contractual (CO)"]["adjustment_amount"].sum()
+        pr_amt = adj_cl[adj_cl["adj_category"]=="Patient Resp. (PR)"]["adjustment_amount"].sum()
+        oa_amt = adj_cl[adj_cl["adj_category"]=="Other (OA)"]["adjustment_amount"].sum()
+
+        c1,c2,c3,c4 = st.columns(4)
+        with c1: st.markdown(kpi_card("Total Adjustments", fmt_currency(total_adj_amt), color=C["warning"]), unsafe_allow_html=True)
+        with c2: st.markdown(kpi_card("Contractual (CO)",  fmt_currency(co_amt),        color=C["accent"]),  unsafe_allow_html=True)
+        with c3: st.markdown(kpi_card("Patient Resp (PR)", fmt_currency(pr_amt),        color=C["purple"]),  unsafe_allow_html=True)
+        with c4: st.markdown(kpi_card("Other (OA)",        fmt_currency(oa_amt),        color=C["teal"]),    unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        col_adj1, col_adj2 = st.columns([2,1])
+        with col_adj1:
+            st.markdown("#### Top Adjustment Reason Codes — Volume & Amount")
+            top_adj = adj_cl.groupby(["adj_code_clean","adj_description","adj_category"]).agg(
+                count=("claim_line_id","count"),
+                total_adj=("adjustment_amount","sum"),
+                avg_adj=("adjustment_amount","mean"),
+            ).reset_index().nlargest(12,"count")
+            top_adj["label"] = top_adj["adj_code_clean"] + " — " + top_adj["adj_description"].str[:30]
+
+            cat_colors = {"Contractual (CO)":C["accent"],"Patient Resp. (PR)":C["purple"],
+                          "Other (OA)":C["teal"],"Unknown":C["muted"]}
+            fig = go.Figure()
+            for cat, grp in top_adj.groupby("adj_category"):
+                fig.add_trace(go.Bar(
+                    y=grp["label"], x=grp["count"],
+                    name=cat, orientation="h",
+                    marker_color=cat_colors.get(cat, C["muted"]),
+                    text=grp["count"].apply(fmt_num),
+                    textposition="outside",
+                ))
+            fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                              plot_bgcolor="rgba(0,0,0,0)", height=400,
+                              margin=dict(l=0,r=0,t=10,b=0), barmode="stack",
+                              legend=dict(orientation="h", y=1.05),
+                              yaxis=dict(categoryorder="total ascending"))
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col_adj2:
+            st.markdown("#### Adjustment Category Split")
+            cat_summary = adj_cl.groupby("adj_category").agg(
+                count=("claim_line_id","count"),
+                total=("adjustment_amount","sum"),
+            ).reset_index()
+            fig = go.Figure(go.Pie(
+                labels=cat_summary["adj_category"],
+                values=cat_summary["total"],
+                hole=0.55,
+                marker_colors=[cat_colors.get(c, C["muted"]) for c in cat_summary["adj_category"]],
+            ))
+            fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                              height=220, margin=dict(l=0,r=0,t=10,b=0))
+            fig.add_annotation(text=f"<b>{fmt_currency(total_adj_amt)}</b><br>Total Adj.",
+                               x=0.5, y=0.5, showarrow=False, font=dict(size=11, color="white"))
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Adj amount by category table
+            for _, row in cat_summary.iterrows():
+                pct = row["total"] / total_adj_amt * 100 if total_adj_amt > 0 else 0
+                cat_name  = row["adj_category"]
+                cat_color = cat_colors.get(cat_name, C["muted"])
+                cat_amt   = fmt_currency(row["total"])
+                st.markdown(
+                    f"<div style='display:flex;justify-content:space-between;padding:4px 0;"
+                    f"border-bottom:1px solid #1F2937;font-size:0.82rem'>"
+                    f"<span style='color:{cat_color}'>{cat_name}</span>"
+                    f"<span style='color:#FAFAFA'>{cat_amt} ({pct:.1f}%)</span></div>",
+                    unsafe_allow_html=True
+                )
+
+        # Remark codes
+        st.markdown("#### Top Remark Codes (RARC)")
+        remark_desc = {
+            "MA04":"Secondary payment cannot be considered without identity of primary payer",
+            "N95": "This provider type/specialty cannot bill this service",
+            "N30": "Patient ineligible for this service",
+            "M20": "Missing/incomplete/invalid HCPCS modifier",
+            "N362":"The number of Days or Units of Service exceeds our acceptable maximum",
+            "N115":"This decision was based on a Local Coverage Determination",
+        }
+        if "remark_code" in cl.columns:
+            rc = cl[cl["remark_code"].notna() & (cl["remark_code"]!="")].groupby("remark_code").agg(
+                count=("claim_line_id","count"),
+                total_billed=("billed_amount","sum"),
+            ).reset_index().nlargest(10,"count")
+            rc["description"] = rc["remark_code"].map(remark_desc).fillna("See RARC lookup")
+            rc["label"] = rc["remark_code"] + " — " + rc["description"].str[:40]
+            fig = px.bar(rc.sort_values("count"), x="count", y="label", orientation="h",
+                         color="total_billed", color_continuous_scale="Blues",
+                         text=rc.sort_values("count")["count"].apply(fmt_num),
+                         labels={"count":"Occurrences","label":"Remark Code","total_billed":"Billed Amount"})
+            fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                              plot_bgcolor="rgba(0,0,0,0)", height=320,
+                              margin=dict(l=0,r=0,t=10,b=0),
+                              yaxis=dict(categoryorder="total ascending"))
+            fig.update_traces(textposition="outside")
+            st.plotly_chart(fig, use_container_width=True)
+
+        top_co = top_adj[top_adj["adj_category"]=="Contractual (CO)"].iloc[0]["adj_code_clean"] if not top_adj[top_adj["adj_category"]=="Contractual (CO)"].empty else "N/A"
+        insight(f"Top contractual adjustment code: {top_co}. "
+                f"Contractual adjustments ({fmt_currency(co_amt)}) are expected and non-recoverable. "
+                f"Focus recovery efforts on PR codes ({fmt_currency(pr_amt)}) — these are patient balances.")
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # TAB 5 — PAYER PERFORMANCE
+    # ─────────────────────────────────────────────────────────────────────────
+    with tab5:
+        st.markdown("### 🏦 Payer Performance Analysis")
+        story("Not all payers are equal. Some pay quickly and at high rates; others deny frequently and pay slowly. "
+              "This analysis ranks payers by collection efficiency, denial rate, and payment speed "
+              "to guide contract negotiations and network strategy.")
+
+        # Payer performance from prior auth (has payer_id)
+        if not pa.empty and "payer_id" in pa.columns:
+            pa_perf = pa.groupby("payer_id").agg(
+                total_auths=("auth_id","count"),
+                approved=("status", lambda x: (x=="APPROVED").sum()),
+                denied=("status",   lambda x: (x=="DENIED").sum()),
+                pending=("status",  lambda x: (x=="PENDING").sum()),
+            ).reset_index()
+            pa_perf["approval_rate"] = pa_perf["approved"] / pa_perf["total_auths"] * 100
+            pa_perf["denial_rate"]   = pa_perf["denied"]   / pa_perf["total_auths"] * 100
+            pa_perf = pa_perf[pa_perf["total_auths"] >= 200].nlargest(15,"total_auths")
+
+            # Turnaround time
+            pa_tat = pa.copy()
+            pa_tat["request_date"]  = pd.to_datetime(pa_tat["request_date"],  errors="coerce")
+            pa_tat["decision_date"] = pd.to_datetime(pa_tat["decision_date"], errors="coerce")
+            pa_tat["tat"] = (pa_tat["decision_date"] - pa_tat["request_date"]).dt.days
+            tat_by_payer = pa_tat.groupby("payer_id")["tat"].mean().reset_index()
+            tat_by_payer.columns = ["payer_id","avg_tat"]
+            pa_perf = pa_perf.merge(tat_by_payer, on="payer_id", how="left")
+
+            c1,c2,c3 = st.columns(3)
+            best_payer = pa_perf.loc[pa_perf["approval_rate"].idxmax(), "payer_id"] if not pa_perf.empty else "N/A"
+            worst_payer = pa_perf.loc[pa_perf["denial_rate"].idxmax(), "payer_id"] if not pa_perf.empty else "N/A"
+            avg_approval = pa_perf["approval_rate"].mean()
+            with c1: st.markdown(kpi_card("Avg Approval Rate", f"{avg_approval:.1f}", suffix="%",
+                                           color=C["success"] if avg_approval>=80 else C["warning"]), unsafe_allow_html=True)
+            with c2: st.markdown(kpi_card("Best Payer",  best_payer[:12],  color=C["success"]), unsafe_allow_html=True)
+            with c3: st.markdown(kpi_card("Worst Payer", worst_payer[:12], color=C["danger"]),  unsafe_allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
+
+            # Scatter: approval rate vs turnaround
+            st.markdown("#### Payer Scorecard — Approval Rate vs Turnaround Time")
+            fig = px.scatter(pa_perf, x="avg_tat", y="approval_rate",
+                             size="total_auths", color="denial_rate",
+                             color_continuous_scale="RdYlGn_r",
+                             range_color=[0,30],
+                             hover_data=["payer_id","total_auths","approved","denied"],
+                             text="payer_id",
+                             labels={"avg_tat":"Avg Turnaround (days)",
+                                     "approval_rate":"Approval Rate %",
+                                     "denial_rate":"Denial Rate %",
+                                     "total_auths":"Total Auths"})
+            fig.add_hline(y=80, line_dash="dash", line_color=C["success"],
+                          annotation_text="80% approval target", annotation_position="right")
+            fig.add_vline(x=5, line_dash="dash", line_color=C["warning"],
+                          annotation_text="5-day target")
+            fig.update_traces(textposition="top center", textfont_size=8)
+            fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                              plot_bgcolor="rgba(0,0,0,0)", height=380,
+                              margin=dict(l=0,r=0,t=20,b=0))
+            st.plotly_chart(fig, use_container_width=True)
+            story("Ideal payers are top-left: high approval rate, fast turnaround. "
+                  "Bottom-right payers (slow + low approval) are candidates for contract renegotiation. "
+                  "Bubble size = total authorization volume.")
+
+            # Payer comparison bar
+            col_p1, col_p2 = st.columns(2)
+            with col_p1:
+                st.markdown("#### Approval Rate by Payer")
+                pa_sorted = pa_perf.sort_values("approval_rate", ascending=True)
+                fig = px.bar(pa_sorted, x="approval_rate", y="payer_id", orientation="h",
+                             color="approval_rate", color_continuous_scale="RdYlGn",
+                             range_color=[50,100],
+                             text=pa_sorted["approval_rate"].apply(lambda x: f"{x:.1f}%"),
+                             labels={"approval_rate":"Approval Rate %","payer_id":"Payer"})
+                fig.add_vline(x=80, line_dash="dash", line_color=C["warning"])
+                fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                                  plot_bgcolor="rgba(0,0,0,0)", height=380,
+                                  margin=dict(l=0,r=0,t=10,b=0), coloraxis_showscale=False)
+                fig.update_traces(textposition="outside")
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col_p2:
+                st.markdown("#### Avg Turnaround Days by Payer")
+                tat_sorted = pa_perf.dropna(subset=["avg_tat"]).sort_values("avg_tat", ascending=True)
+                fig = px.bar(tat_sorted, x="avg_tat", y="payer_id", orientation="h",
+                             color="avg_tat", color_continuous_scale="RdYlGn_r",
+                             range_color=[0,15],
+                             text=tat_sorted["avg_tat"].apply(lambda x: f"{x:.1f}d"),
+                             labels={"avg_tat":"Avg Days","payer_id":"Payer"})
+                fig.add_vline(x=5, line_dash="dash", line_color=C["success"],
+                              annotation_text="5-day target")
+                fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                                  plot_bgcolor="rgba(0,0,0,0)", height=380,
+                                  margin=dict(l=0,r=0,t=10,b=0), coloraxis_showscale=False)
+                fig.update_traces(textposition="outside")
+                st.plotly_chart(fig, use_container_width=True)
+
+            # Payer volume stacked bar
+            st.markdown("#### Auth Outcome Distribution by Payer")
+            pa_stacked = pa_perf.sort_values("total_auths", ascending=False).head(12)
+            fig = go.Figure()
+            fig.add_trace(go.Bar(name="Approved", x=pa_stacked["payer_id"], y=pa_stacked["approved"],
+                                 marker_color=C["success"]))
+            fig.add_trace(go.Bar(name="Denied",   x=pa_stacked["payer_id"], y=pa_stacked["denied"],
+                                 marker_color=C["danger"]))
+            fig.add_trace(go.Bar(name="Pending",  x=pa_stacked["payer_id"], y=pa_stacked["pending"],
+                                 marker_color=C["warning"]))
+            fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                              plot_bgcolor="rgba(0,0,0,0)", height=280,
+                              margin=dict(l=0,r=0,t=10,b=0), barmode="stack",
+                              legend=dict(orientation="h", y=1.1),
+                              xaxis=dict(tickangle=-30))
+            st.plotly_chart(fig, use_container_width=True)
+
+        # Procedure revenue by payer (from gold)
+        if not proc_rev.empty:
+            st.markdown("#### Procedure Reimbursement Rates — Top CPT Codes")
+            top_proc = proc_rev.nlargest(15,"utilization_count").copy()
+            top_proc["label"] = top_proc["cpt_code"] + " " + top_proc["procedure_description"].str[:20].fillna("")
+            top_proc = top_proc.sort_values("avg_reimbursement_rate_pct")
+            fig = px.bar(top_proc, x="avg_reimbursement_rate_pct", y="label", orientation="h",
+                         color="avg_reimbursement_rate_pct", color_continuous_scale="RdYlGn",
+                         range_color=[40,100],
+                         text=top_proc["avg_reimbursement_rate_pct"].apply(lambda x: f"{x:.1f}%"),
+                         labels={"avg_reimbursement_rate_pct":"Reimb. Rate %","label":"Procedure"})
+            fig.add_vline(x=75, line_dash="dash", line_color=C["warning"],
+                          annotation_text="75% target")
+            fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
+                              plot_bgcolor="rgba(0,0,0,0)", height=380,
+                              margin=dict(l=0,r=0,t=10,b=0), coloraxis_showscale=False)
+            fig.update_traces(textposition="outside")
+            st.plotly_chart(fig, use_container_width=True)
+
+        # Final billing insights
+        st.markdown("---")
+        col_i1, col_i2, col_i3 = st.columns(3)
+        with col_i1:
+            st.markdown(f"""
+            <div class="kpi-card" style="text-align:left">
+              <div class="kpi-label">💡 Revenue Opportunity</div>
+              <div style="font-size:1.4rem;font-weight:700;color:{C['success']};margin:0.4rem 0">
+                {fmt_currency(total_denied_amt * 0.35)}
+              </div>
+              <div style="font-size:0.8rem;color:#9E9E9E">
+                Estimated recoverable from denied claims<br>
+                (35% industry average overturn rate)
+              </div>
+            </div>""", unsafe_allow_html=True)
+        with col_i2:
+            st.markdown(f"""
+            <div class="kpi-card" style="text-align:left">
+              <div class="kpi-label">⚠️ AR at Risk</div>
+              <div style="font-size:1.4rem;font-weight:700;color:{C['danger']};margin:0.4rem 0">
+                {fmt_currency(outstanding[outstanding['days_since']>90]['billed_amount'].sum())}
+              </div>
+              <div style="font-size:0.8rem;color:#9E9E9E">
+                Outstanding claims over 90 days<br>
+                High write-off risk — immediate action needed
+              </div>
+            </div>""", unsafe_allow_html=True)
+        with col_i3:
+            patient_collectible = cl[cl["status_clean"].isin(["Pending","Rejected"])]["patient_responsibility"].sum()
+            st.markdown(f"""
+            <div class="kpi-card" style="text-align:left">
+              <div class="kpi-label">👤 Patient Balance</div>
+              <div style="font-size:1.4rem;font-weight:700;color:{C['purple']};margin:0.4rem 0">
+                {fmt_currency(patient_collectible)}
+              </div>
+              <div style="font-size:0.8rem;color:#9E9E9E">
+                Collectible patient responsibility<br>
+                on pending/rejected claims
+              </div>
+            </div>""", unsafe_allow_html=True)
+
+# ═══════════════════════════════════════════════════════════════════════════════
 #  FOOTER
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1729,3 +2322,4 @@ st.markdown("""
   Data: Medallion Architecture (Bronze → Silver → Gold)
 </div>
 """, unsafe_allow_html=True)
+
