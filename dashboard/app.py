@@ -33,17 +33,17 @@ SILVER = BASE / "delta" / "silver"
 # ── Colour palette ────────────────────────────────────────────────────────────
 C = {
     "primary":   "#1E3A5F",
-    "accent":    "#2196F3",
-    "success":   "#00C853",
-    "warning":   "#FF9800",
-    "danger":    "#F44336",
-    "purple":    "#7C4DFF",
-    "teal":      "#00BCD4",
-    "gold":      "#FFC107",
-    "bg":        "#0E1117",
-    "card":      "#1A1F2E",
-    "text":      "#FAFAFA",
-    "muted":     "#9E9E9E",
+    "accent":    "#3B82F6",
+    "success":   "#22C55E",
+    "warning":   "#F59E0B",
+    "danger":    "#EF4444",
+    "purple":    "#A855F7",
+    "teal":      "#06B6D4",
+    "gold":      "#EAB308",
+    "bg":        "#0A0D14",
+    "card":      "#1E2740",
+    "text":      "#F1F5F9",
+    "muted":     "#64748B",
 }
 
 SEQ_BLUE  = px.colors.sequential.Blues
@@ -54,69 +54,153 @@ QUAL      = px.colors.qualitative.Set2
 # ── CSS ───────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-  html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
-  .main { background: #0E1117; }
-  .block-container { padding: 1.5rem 2rem; }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-  /* KPI cards */
+  /* ── Global ── */
+  html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
+  .main { background: #0A0D14; }
+  .block-container { padding: 1.8rem 2.2rem 3rem 2.2rem; max-width: 1400px; }
+
+  /* ── Page title override ── */
+  h1 { font-size: 2rem !important; font-weight: 800 !important; color: #FFFFFF !important; letter-spacing: -0.02em; }
+  h2 { font-size: 1.4rem !important; font-weight: 700 !important; color: #F1F5F9 !important; }
+  h3 { font-size: 1.1rem !important; font-weight: 600 !important; color: #E2E8F0 !important; }
+  p, li, span, div { color: #CBD5E1; }
+
+  /* ── KPI cards ── */
   .kpi-card {
-    background: linear-gradient(135deg, #1A1F2E 0%, #1E2640 100%);
-    border: 1px solid #2D3561;
-    border-radius: 12px;
-    padding: 1.2rem 1.4rem;
+    background: linear-gradient(135deg, #1E2740 0%, #242D4A 100%);
+    border: 1px solid #334268;
+    border-radius: 14px;
+    padding: 1.4rem 1.6rem;
     text-align: center;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-    transition: transform 0.2s;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+    transition: transform 0.2s, box-shadow 0.2s;
+    min-height: 100px;
   }
-  .kpi-card:hover { transform: translateY(-2px); }
-  .kpi-value { font-size: 2rem; font-weight: 700; margin: 0.2rem 0; }
-  .kpi-label { font-size: 0.78rem; color: #9E9E9E; text-transform: uppercase; letter-spacing: 0.08em; }
-  .kpi-delta { font-size: 0.82rem; margin-top: 0.3rem; }
-  .delta-up   { color: #00C853; }
-  .delta-down { color: #F44336; }
-  .delta-neu  { color: #9E9E9E; }
+  .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(0,0,0,0.6); }
+  .kpi-value {
+    font-size: 2.1rem; font-weight: 800; margin: 0.3rem 0;
+    letter-spacing: -0.03em; line-height: 1.1;
+  }
+  .kpi-label {
+    font-size: 0.72rem; color: #94A3B8;
+    text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;
+  }
+  .kpi-delta { font-size: 0.85rem; margin-top: 0.35rem; font-weight: 600; }
+  .delta-up   { color: #22C55E; }
+  .delta-down { color: #EF4444; }
+  .delta-neu  { color: #94A3B8; }
 
-  /* Section headers */
+  /* ── Section headers ── */
   .section-header {
-    font-size: 1.1rem; font-weight: 600; color: #FAFAFA;
-    border-left: 4px solid #2196F3;
-    padding-left: 0.8rem; margin: 1.5rem 0 0.8rem 0;
+    font-size: 1.05rem; font-weight: 700; color: #F1F5F9;
+    border-left: 4px solid #3B82F6;
+    padding: 0.1rem 0 0.1rem 0.9rem;
+    margin: 1.8rem 0 1rem 0;
+    letter-spacing: -0.01em;
   }
+
+  /* ── Callout boxes ── */
   .story-box {
-    background: linear-gradient(135deg, #1A2744 0%, #1E2A50 100%);
-    border-left: 4px solid #2196F3;
-    border-radius: 0 8px 8px 0;
-    padding: 0.9rem 1.2rem;
-    margin: 0.5rem 0 1rem 0;
-    font-size: 0.88rem; color: #CFD8DC; line-height: 1.6;
+    background: linear-gradient(135deg, #1E2F55 0%, #1A2B50 100%);
+    border: 1px solid #2D4A8A;
+    border-left: 5px solid #3B82F6;
+    border-radius: 0 10px 10px 0;
+    padding: 1rem 1.4rem;
+    margin: 0.6rem 0 1.2rem 0;
+    font-size: 0.92rem; color: #BFDBFE; line-height: 1.7;
   }
   .insight-box {
-    background: linear-gradient(135deg, #1A2A1A 0%, #1E3020 100%);
-    border-left: 4px solid #00C853;
-    border-radius: 0 8px 8px 0;
-    padding: 0.9rem 1.2rem;
-    margin: 0.5rem 0 1rem 0;
-    font-size: 0.88rem; color: #C8E6C9; line-height: 1.6;
+    background: linear-gradient(135deg, #14302A 0%, #163528 100%);
+    border: 1px solid #166534;
+    border-left: 5px solid #22C55E;
+    border-radius: 0 10px 10px 0;
+    padding: 1rem 1.4rem;
+    margin: 0.6rem 0 1.2rem 0;
+    font-size: 0.92rem; color: #BBF7D0; line-height: 1.7;
   }
   .alert-box {
-    background: linear-gradient(135deg, #2A1A1A 0%, #301E1E 100%);
-    border-left: 4px solid #F44336;
-    border-radius: 0 8px 8px 0;
-    padding: 0.9rem 1.2rem;
-    margin: 0.5rem 0 1rem 0;
-    font-size: 0.88rem; color: #FFCDD2; line-height: 1.6;
+    background: linear-gradient(135deg, #3B1414 0%, #3D1A1A 100%);
+    border: 1px solid #7F1D1D;
+    border-left: 5px solid #EF4444;
+    border-radius: 0 10px 10px 0;
+    padding: 1rem 1.4rem;
+    margin: 0.6rem 0 1.2rem 0;
+    font-size: 0.92rem; color: #FECACA; line-height: 1.7;
   }
-  /* Sidebar */
-  [data-testid="stSidebar"] { background: #111827; border-right: 1px solid #1F2937; }
-  [data-testid="stSidebar"] .stSelectbox label { color: #9CA3AF; font-size: 0.8rem; }
-  /* Tabs */
-  .stTabs [data-baseweb="tab-list"] { gap: 4px; background: #1A1F2E; border-radius: 8px; padding: 4px; }
-  .stTabs [data-baseweb="tab"] { border-radius: 6px; padding: 0.4rem 1rem; font-size: 0.85rem; }
-  .stTabs [aria-selected="true"] { background: #2196F3 !important; color: white !important; }
-  /* Metric */
-  [data-testid="metric-container"] { background: #1A1F2E; border-radius: 8px; padding: 0.8rem; border: 1px solid #2D3561; }
-  div[data-testid="stMetricValue"] { font-size: 1.6rem !important; }
+
+  /* ── Sidebar ── */
+  [data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #0F172A 0%, #111827 100%) !important;
+    border-right: 1px solid #1E293B;
+    min-width: 220px;
+  }
+  [data-testid="stSidebar"] h2,
+  [data-testid="stSidebar"] p,
+  [data-testid="stSidebar"] span,
+  [data-testid="stSidebar"] div,
+  [data-testid="stSidebar"] label { color: #E2E8F0 !important; }
+  [data-testid="stSidebar"] .stMarkdown p { color: #94A3B8 !important; font-size: 0.82rem; }
+  /* Sidebar radio labels — bright & readable */
+  [data-testid="stSidebar"] [data-testid="stRadio"] label {
+    color: #E2E8F0 !important;
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    padding: 0.3rem 0.5rem !important;
+  }
+  [data-testid="stSidebar"] [data-testid="stRadio"] label:hover {
+    color: #FFFFFF !important;
+  }
+  /* Active radio item */
+  [data-testid="stSidebar"] [data-testid="stRadio"] [aria-checked="true"] + label,
+  [data-testid="stSidebar"] [data-testid="stRadio"] input:checked + div label {
+    color: #60A5FA !important;
+    font-weight: 700 !important;
+  }
+
+  /* ── Tabs ── */
+  .stTabs [data-baseweb="tab-list"] {
+    gap: 6px; background: #1E2740;
+    border-radius: 10px; padding: 5px;
+    border: 1px solid #334268;
+  }
+  .stTabs [data-baseweb="tab"] {
+    border-radius: 7px; padding: 0.5rem 1.2rem;
+    font-size: 0.88rem !important; font-weight: 600 !important;
+    color: #94A3B8 !important;
+    background: transparent !important;
+    transition: all 0.15s;
+  }
+  .stTabs [data-baseweb="tab"]:hover { color: #E2E8F0 !important; background: #2D3F6A !important; }
+  .stTabs [aria-selected="true"] {
+    background: #3B82F6 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 2px 8px rgba(59,130,246,0.5);
+  }
+
+  /* ── Metric widget ── */
+  [data-testid="metric-container"] {
+    background: #1E2740; border-radius: 10px;
+    padding: 1rem 1.2rem; border: 1px solid #334268;
+  }
+  div[data-testid="stMetricValue"] { font-size: 1.8rem !important; font-weight: 800 !important; color: #FFFFFF !important; }
+  div[data-testid="stMetricLabel"] { font-size: 0.8rem !important; color: #94A3B8 !important; text-transform: uppercase; letter-spacing: 0.08em; }
+
+  /* ── Dataframe ── */
+  [data-testid="stDataFrame"] { border: 1px solid #334268; border-radius: 8px; overflow: hidden; }
+  .dvn-scroller { background: #1E2740 !important; }
+
+  /* ── Dividers ── */
+  hr { border-color: #1E293B !important; margin: 1.5rem 0; }
+
+  /* ── Selectbox / Slider labels ── */
+  .stSlider label, .stSelectbox label, .stMultiSelect label {
+    color: #94A3B8 !important; font-size: 0.82rem !important;
+    text-transform: uppercase; letter-spacing: 0.07em;
+  }
+  /* Slider track */
+  [data-testid="stSlider"] [data-baseweb="slider"] [data-testid="stTickBar"] span { color: #94A3B8 !important; font-size: 0.78rem; }
 </style>
 """, unsafe_allow_html=True)
 
