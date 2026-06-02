@@ -1,4 +1,4 @@
-﻿"""
+"""
 Medical Billing Intelligence Dashboard
 =======================================
 World-class Streamlit dashboard with data storytelling.
@@ -16,6 +16,8 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from pathlib import Path
 import datetime
+import sys as _sys; _sys.path.insert(0, str(Path(__file__).parent))
+from advanced_pages import page_advanced_visuals, page_pdf_report, page_ai_query
 
 # ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -286,13 +288,16 @@ with st.sidebar:
     page = st.radio("", [
         "🏠 Executive Overview",
         "💰 Revenue & Claims",
-        "🏦 Medical Billing Deep-Dive",
         "👥 Patient Demographics",
         "🔬 Clinical Operations",
         "💊 Procedures & Labs",
         "📅 Appointment Analytics",
         "⚠️ Prior Authorizations",
         "🏥 Facility Intelligence",
+        "🏦 Medical Billing Deep-Dive",
+        "🌌 Advanced Analytics",
+        "📄 PDF Report",
+        "🤖 AI Query Engine",
     ], label_visibility="collapsed")
 
     st.markdown("---")
@@ -2396,6 +2401,17 @@ elif page == "🏦 Medical Billing Deep-Dive":
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  FOOTER
+
+
+elif page == "🌌 Advanced Analytics":
+    page_advanced_visuals()
+
+elif page == "📄 PDF Report":
+    page_pdf_report()
+
+elif page == "🤖 AI Query Engine":
+    page_ai_query()
+
 # ═══════════════════════════════════════════════════════════════════════════════
 
 st.markdown("---")
