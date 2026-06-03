@@ -856,350 +856,220 @@ def page_pdf_report():
 #  PAGE: AI AD-HOC QUERY
 # ═══════════════════════════════════════════════════════════════
 
-# Data catalogue for the AI to reason about
-DATA_CATALOGUE = {
-    "claim_lines": {
-        "desc": "Individual billing line items with amounts, CPT codes, and status",
-        "cols": {
-            "billed_amount":"float - gross charged amount",
-            "paid_amount":"float - amount actually collected",
-            "allowed_amount":"float - payer-allowed amount",
-            "patient_responsibility":"float - amount owed by patient",
-            "adjustment_amount":"float - contractual adjustment",
-            "adjustment_reason_code":"str - CARC code e.g. CO-4, PR-3",
-            "line_status":"str - Paid|Denied|Pending|Rejected|Appealed|Void|Adjusted",
-            "service_date":"date - date of service",
-            "cpt_code":"str - procedure code e.g. 99213",
-            "units":"int - units of service",
-        }
-    },
-    "prior_authorizations": {
-        "desc": "Prior authorization requests with approval/denial status",
-        "cols": {
-            "status":"str - APPROVED|DENIED|PENDING|EXPIRED|APPEALED",
-            "service_type":"str - type of medical service",
-            "payer_id":"str - insurance payer identifier",
-            "urgency":"str - Routine|Urgent|Emergent",
-            "denial_reason":"str - reason for denial if denied",
-            "request_date":"date - when auth was requested",
-            "decision_date":"date - when decision was made",
-            "approved_units":"int - units approved",
-        }
-    },
-    "patients": {
-        "desc": "Patient demographics and clinical characteristics",
-        "cols": {
-            "age":"int - patient age in years",
-            "gender":"str - Male|Female|Non-Binary",
-            "race":"str - race/ethnicity",
-            "state":"str - US state abbreviation",
-            "smoking_status":"str - Never|Former|Current",
-            "bmi_category":"str - Normal|Overweight|Obese|Morbidly Obese",
-            "income_bracket":"str - income range",
-            "employment_status":"str - Employed|Retired|Disabled etc",
-        }
-    },
-    "vitals": {
-        "desc": "Clinical vital signs recorded per encounter",
-        "cols": {
-            "systolic_bp":"float - systolic blood pressure mmHg",
-            "diastolic_bp":"float - diastolic blood pressure mmHg",
-            "heart_rate":"float - heart rate bpm",
-            "bmi":"float - body mass index",
-            "temperature_f":"float - temperature Fahrenheit",
-            "oxygen_saturation":"float - SpO2 percentage",
-        }
-    },
-    "kpi_procedure_revenue": {
-        "desc": "Gold-layer procedure revenue aggregations by CPT code",
-        "cols": {
-            "cpt_code":"str - CPT procedure code",
-            "procedure_description":"str - description of procedure",
-            "utilization_count":"int - total procedures performed",
-            "total_billed":"float - total billed amount",
-            "total_paid":"float - total collected amount",
-            "avg_billed":"float - average billed per procedure",
-            "avg_paid":"float - average paid per procedure",
-            "avg_reimbursement_rate_pct":"float - average reimbursement rate percentage",
-        }
-    },
-    "kpi_appointment_ops": {
-        "desc": "Gold-layer appointment operations KPIs by year/month/type",
-        "cols": {
-            "year":"int - year",
-            "month":"int - month number",
-            "appointment_type":"str - type of appointment",
-            "total_scheduled":"int - total appointments scheduled",
-            "completed":"int - appointments completed",
-            "cancelled":"int - appointments cancelled",
-            "no_show":"int - no-show appointments",
-            "completion_rate_pct":"float - completion rate percent",
-            "no_show_rate_pct":"float - no-show rate percent",
-            "avg_duration_minutes":"float - average appointment duration",
-        }
-    },
-    "kpi_patient_risk": {
-        "desc": "Gold-layer patient risk scores and chronic condition counts",
-        "cols": {
-            "patient_id":"str - unique patient identifier",
-            "age":"int - patient age",
-            "gender":"str - Male|Female|Non-Binary",
-            "bmi_category":"str - BMI category",
-            "smoking_status":"str - smoking status",
-            "chronic_condition_count":"int - number of chronic conditions",
-            "total_diagnoses":"int - total diagnoses count",
-            "distinct_icd10_codes":"int - distinct ICD-10 codes",
-            "risk_score":"float - calculated risk score 0-100",
-            "risk_tier":"str - Low|Medium|High",
-        }
-    },
+
+# ════════════════════════════════════════════════════
+# PAGE 3 — AI AD-HOC QUERY ENGINE (Multi-Provider)
+# ════════════════════════════════════════════════════
+
+CATALOGUE = {
+    "claim_lines":            "Billing lines: billed_amount, paid_amount, allowed_amount, patient_responsibility, adjustment_amount, adjustment_reason_code, line_status(Paid|Denied|Pending|Rejected|Appealed|Void|Adjusted), service_date, cpt_code, units",
+    "prior_authorizations":   "Prior auth: status(APPROVED|DENIED|PENDING|EXPIRED|APPEALED), service_type, payer_id, urgency(Routine|Urgent|Emergent), denial_reason, request_date, decision_date, approved_units",
+    "patients":               "Demographics: age(int), gender(Male|Female|Non-Binary), race, state(2-letter), smoking_status(Never|Former|Current), bmi_category, income_bracket, employment_status",
+    "vitals":                 "Clinical vitals: systolic_bp, diastolic_bp, heart_rate, bmi, temperature_f, oxygen_saturation",
+    "kpi_procedure_revenue":  "Gold: cpt_code, procedure_description, utilization_count, total_billed, total_paid, avg_billed, avg_paid, avg_reimbursement_rate_pct",
+    "kpi_appointment_ops":    "Gold: year, month, appointment_type, total_scheduled, completed, cancelled, no_show, completion_rate_pct, no_show_rate_pct, avg_duration_minutes",
+    "kpi_patient_risk":       "Gold: patient_id, age, gender, bmi_category, smoking_status, chronic_condition_count, total_diagnoses, distinct_icd10_codes, risk_score(0-100), risk_tier(Low|Medium|High)",
 }
 
-def _build_system_prompt():
-    catalogue_text = ""
-    for table, info in DATA_CATALOGUE.items():
-        catalogue_text += f"\nTable: {table}\nDescription: {info['desc']}\nColumns:\n"
-        for col, desc in info["cols"].items():
-            catalogue_text += f"  - {col}: {desc}\n"
-    return f"""You are a medical billing data analyst assistant.
-You have access to these pandas DataFrames (pre-loaded, referenced by variable name):
-{catalogue_text}
+EXAMPLES = [
+    "Total billed and paid by CPT code for top 10 procedures",
+    "Monthly denial rate trend over time",
+    "Prior auth denial rate by service type",
+    "States with highest number of high-risk patients",
+    "Average systolic blood pressure by gender and BMI category",
+    "Top 5 adjustment reason codes by total amount",
+    "No-show rate by appointment type",
+    "Average collection rate by claim line status",
+    "Age distribution for high-risk patients",
+    "Payers with lowest prior auth approval rates",
+]
 
-Rules:
-1. Convert the user's natural language question into valid Python/pandas code.
-2. The code must assign the final result to a variable called `result`.
-3. Use only the tables and columns listed above.
-4. For date filtering use: pd.to_datetime(df['col'], errors='coerce')
-5. For claim_lines line_status, normalise with: df['line_status'].str.strip().str.title()
-   Then: Paid, Denied, Pending, Rejected, Appealed, Void, Adjusted
-6. Return ONLY executable Python code, no explanations, no markdown fences.
-7. The result should be a pandas DataFrame or Series.
-8. Do not import anything — all libraries are pre-loaded (pd, np).
-9. Also suggest a chart_type on the last line as a Python comment:
-   # chart_type: bar|line|pie|scatter|table|histogram
-"""
+SYS_PROMPT = (
+    "You are a medical billing data analyst. Convert the user question into valid Python/pandas code.\n"
+    "Available DataFrames: " + ", ".join(CATALOGUE.keys()) + "\n\n"
+    "Columns:\n" + "\n".join(f"- {k}: {v}" for k, v in CATALOGUE.items()) + "\n\n"
+    "Rules:\n"
+    "1. Assign final result to: result\n"
+    "2. For line_status normalise first: df['st']=df['line_status'].str.strip().str.title()\n"
+    "3. Date columns: pd.to_datetime(df['col'], errors='coerce')\n"
+    "4. Return ONLY executable Python — no markdown fences, no explanations\n"
+    "5. Last line: # chart_type: bar|line|pie|scatter|table|histogram\n"
+)
 
-def _call_openai(question: str, api_key: str) -> str:
-    """Call OpenAI API and return generated code."""
-    client = openai.OpenAI(api_key=api_key)
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": _build_system_prompt()},
-            {"role": "user",   "content": question},
-        ],
-        temperature=0.1,
-        max_tokens=800,
-    )
-    return response.choices[0].message.content.strip()
+PROVIDER_MODELS = {
+    "Groq (Free)":    ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768", "gemma2-9b-it"],
+    "OpenAI":         ["gpt-4o-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"],
+    "Anthropic":      ["claude-3-haiku-20240307", "claude-3-5-sonnet-20241022", "claude-3-opus-20240229"],
+    "Ollama (Local)": ["llama3.2", "llama3.1", "mistral", "codellama", "phi3"],
+}
 
-def _extract_chart_type(code: str) -> str:
-    """Extract chart_type hint from last comment line."""
-    for line in reversed(code.strip().split("\n")):
+PROVIDER_HELP = {
+    "Groq (Free)":    ("gsk_...", "console.groq.com", "Free tier available — fastest inference. Recommended for most users."),
+    "OpenAI":         ("sk-...", "platform.openai.com", "gpt-4o-mini is fast and cheap (~$0.0001/query). Highly accurate."),
+    "Anthropic":      ("sk-ant-...", "console.anthropic.com", "Claude is excellent at reasoning. Haiku is cheapest."),
+    "Ollama (Local)": ("", "", "Runs fully locally — NO API key needed. Install ollama.com, pull a model, run 'ollama serve'."),
+}
+
+def _call_ai(question, provider, api_key, model, base_url=None):
+    if provider in ("OpenAI", "Groq (Free)"):
+        import openai as oa
+        base = "https://api.groq.com/openai/v1" if "Groq" in provider else None
+        kw = dict(api_key=api_key)
+        if base: kw["base_url"] = base
+        client = oa.OpenAI(**kw)
+        r = client.chat.completions.create(model=model, temperature=0.1, max_tokens=700,
+            messages=[{"role":"system","content":SYS_PROMPT},{"role":"user","content":question}])
+        return r.choices[0].message.content.strip()
+    elif provider == "Anthropic":
+        import anthropic
+        client = anthropic.Anthropic(api_key=api_key)
+        msg = client.messages.create(model=model, max_tokens=700, system=SYS_PROMPT,
+            messages=[{"role":"user","content":question}])
+        return msg.content[0].text.strip()
+    elif provider == "Ollama (Local)":
+        import requests
+        url = (base_url or "http://localhost:11434") + "/api/chat"
+        r = requests.post(url, json={"model":model,"stream":False,
+            "messages":[{"role":"system","content":SYS_PROMPT},{"role":"user","content":question}]}, timeout=120)
+        r.raise_for_status()
+        return r.json()["message"]["content"].strip()
+    else:
+        raise ValueError(f"Unknown provider: {provider}")
+
+def _chart_type(code):
+    for line in reversed(code.split("\n")):
         if "chart_type:" in line:
             for ct in ["bar","line","pie","scatter","table","histogram"]:
-                if ct in line:
-                    return ct
-    return "table"
+                if ct in line: return ct
+    return "bar"
 
-def _safe_exec(code: str, frames: dict):
-    """Safely execute generated code and return result."""
-    safe_globals = {"pd": pd, "np": np, **frames}
-    local_ns = {}
-    exec(code, safe_globals, local_ns)
-    return local_ns.get("result", None)
+def _run_code(code, frames):
+    g = {"pd":pd,"np":np}; g.update(frames); l = {}
+    exec(code, g, l); return l.get("result")
 
-def _auto_chart(result, chart_type: str, question: str):
-    """Render the appropriate chart for the result."""
-    if result is None or (hasattr(result, "empty") and result.empty):
-        st.warning("Query returned no results.")
-        return
-
-    if isinstance(result, (int, float, np.integer, np.floating)):
-        st.metric("Result", f"{result:,.2f}")
-        return
-
-    if isinstance(result, pd.Series):
-        result = result.reset_index()
-        result.columns = ["Category", "Value"]
-
-    if not isinstance(result, pd.DataFrame):
-        st.write(result)
-        return
-
-    # Always show data table
-    st.dataframe(result.head(100), use_container_width=True, hide_index=True)
-
-    if len(result) == 0 or len(result.columns) < 2:
-        return
-
-    num_cols = result.select_dtypes(include=np.number).columns.tolist()
-    cat_cols = result.select_dtypes(exclude=np.number).columns.tolist()
-    if not num_cols:
-        return
-
-    y_col = num_cols[0]
-    x_col = cat_cols[0] if cat_cols else result.columns[0]
-
-    st.markdown("#### 📊 Auto-Generated Chart")
-    if chart_type == "pie" and len(result) <= 15:
-        fig = px.pie(result, names=x_col, values=y_col, hole=0.45,
-                     color_discrete_sequence=px.colors.qualitative.Set2,
-                     title=question[:80])
-        fig.update_layout(**CHART_LAYOUT, height=420)
-        st.plotly_chart(fig, use_container_width=True)
-
-    elif chart_type == "line":
-        fig = px.line(result, x=x_col, y=num_cols,
-                      markers=True, title=question[:80],
-                      color_discrete_sequence=[C["accent"],C["success"],C["warning"]])
-        fig.update_layout(**CHART_LAYOUT, height=380)
-        st.plotly_chart(fig, use_container_width=True)
-
-    elif chart_type == "scatter" and len(num_cols) >= 2:
-        fig = px.scatter(result, x=num_cols[0], y=num_cols[1],
-                         color=cat_cols[0] if cat_cols else None,
-                         size=num_cols[2] if len(num_cols)>2 else None,
-                         title=question[:80],
-                         color_discrete_sequence=px.colors.qualitative.Set2)
-        fig.update_layout(**CHART_LAYOUT, height=400)
-        st.plotly_chart(fig, use_container_width=True)
-
-    elif chart_type == "histogram":
-        fig = px.histogram(result, x=y_col, nbins=30, title=question[:80],
-                           color_discrete_sequence=[C["accent"]])
-        fig.update_layout(**CHART_LAYOUT, height=360)
-        st.plotly_chart(fig, use_container_width=True)
-
-    else:  # default bar
-        result_plot = result.head(30)
-        if len(result_plot) > 15:
-            fig = px.bar(result_plot, x=y_col, y=x_col, orientation="h",
-                         color=y_col, color_continuous_scale="Blues",
-                         title=question[:80])
-            fig.update_layout(**CHART_LAYOUT, height=max(320, len(result_plot)*22),
-                              yaxis=dict(categoryorder="total ascending"),
-                              coloraxis_showscale=False)
+def _render(res, ct, q):
+    if res is None or (hasattr(res,"empty") and res.empty): st.warning("No results."); return
+    if isinstance(res,(int,float,np.integer,np.floating)): st.metric("Result",f"{res:,.2f}"); return
+    if isinstance(res,pd.Series): res=res.reset_index(); res.columns=["Category","Value"]
+    if not isinstance(res,pd.DataFrame): st.write(res); return
+    st.dataframe(res.head(200), use_container_width=True, hide_index=True)
+    if len(res)==0 or len(res.columns)<2: return
+    num=res.select_dtypes(include=np.number).columns.tolist()
+    cat=res.select_dtypes(exclude=np.number).columns.tolist()
+    if not num: return
+    yc=num[0]; xc=cat[0] if cat else res.columns[0]
+    st.markdown("#### Auto-Generated Chart")
+    if ct=="pie" and len(res)<=20:
+        fig=px.pie(res,names=xc,values=yc,hole=0.45,color_discrete_sequence=QUAL,title=q[:80])
+    elif ct=="line":
+        fig=px.line(res,x=xc,y=num,markers=True,title=q[:80],color_discrete_sequence=[C["accent"],C["success"],C["warning"]])
+    elif ct=="scatter" and len(num)>=2:
+        fig=px.scatter(res,x=num[0],y=num[1],color=cat[0] if cat else None,title=q[:80],color_discrete_sequence=QUAL)
+    elif ct=="histogram":
+        fig=px.histogram(res,x=yc,nbins=30,title=q[:80],color_discrete_sequence=[C["accent"]])
+    else:
+        if len(res)>15:
+            fig=px.bar(res.head(30),x=yc,y=xc,orientation="h",color=yc,color_continuous_scale="Blues",title=q[:80])
+            fig.update_layout(yaxis=dict(categoryorder="total ascending"),coloraxis_showscale=False)
         else:
-            fig = px.bar(result_plot, x=x_col, y=y_col,
-                         color=y_col, color_continuous_scale="Blues",
-                         title=question[:80], text_auto=True)
-            fig.update_layout(**CHART_LAYOUT, height=360, coloraxis_showscale=False)
-        st.plotly_chart(fig, use_container_width=True)
+            fig=px.bar(res,x=xc,y=yc,color=yc,color_continuous_scale="Blues",title=q[:80],text_auto=True)
+            fig.update_layout(coloraxis_showscale=False)
+    fig.update_layout(**LAYOUT,height=420)
+    st.plotly_chart(fig,use_container_width=True)
 
 
 def page_ai_query():
-    st.markdown("# 🤖 AI Ad-Hoc Query Engine")
-    st.markdown("*Ask any question in plain English — AI converts it to a pandas query and renders the result with the best chart*")
+    st.markdown("# \U0001f916 AI Ad-Hoc Query Engine")
+    st.markdown("*Ask anything in plain English — AI writes the query, runs it, and picks the best chart*")
     st.markdown("---")
+    _story("No SQL or Python needed. Choose your AI provider, enter an optional API key, "
+           "pick a question or type your own. Groq is free and very fast — recommended for first-time users.")
 
-    story("Type your question in natural language. The AI understands medical billing terminology, "
-          "knows all available tables and columns, and automatically picks the best chart type. "
-          "No SQL or Python knowledge needed.")
+    # ── Provider row ─────────────────────────────────────────────────────────
+    st.markdown("### \u2699\ufe0f AI Provider Configuration")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        provider = st.selectbox("\U0001f916 Provider", list(PROVIDER_MODELS.keys()),
+                                 help="Groq is free. Ollama runs 100% locally.")
+        ph, link, tip = PROVIDER_HELP[provider]
+        st.caption(tip)
+    with c2:
+        model = st.selectbox("Model", PROVIDER_MODELS[provider])
+        if provider == "Ollama (Local)":
+            ollama_url = st.text_input("Ollama URL", "http://localhost:11434")
+        else:
+            ollama_url = None
+    with c3:
+        if provider == "Ollama (Local)":
+            api_key = "local"
+            st.success("\u2705 No API key needed — runs locally")
+        else:
+            api_key = st.text_input(f"{provider} API Key", type="password",
+                                     placeholder=ph, help=f"Get key at {link}")
+            if api_key and len(api_key) > 8:
+                st.success(f"\u2705 {provider} key provided")
+            elif api_key:
+                st.error("Key looks too short")
+            else:
+                st.warning(f"Get free key at {link}")
 
-    # ── API Key ───────────────────────────────────────────────
-    with st.expander("🔑 OpenAI API Key (required)", expanded=True):
-        api_key = st.text_input("Enter your OpenAI API key",
-                                 type="password",
-                                 placeholder="sk-...",
-                                 help="Your key is never stored. Get one at platform.openai.com")
-        st.caption("Uses gpt-4o-mini — very fast and cost-effective (~$0.0001 per query)")
-
-    # ── Example queries ───────────────────────────────────────
-    st.markdown("#### 💡 Example Questions — click to try")
-    examples = [
-        "What is the total billed and paid amount by CPT code for the top 10 procedures?",
-        "Show me the monthly denial rate trend over time",
-        "What percentage of prior authorizations were denied by service type?",
-        "Which states have the highest number of high-risk patients?",
-        "What is the average systolic blood pressure by gender and BMI category?",
-        "Show me the top 5 adjustment reason codes by total adjustment amount",
-        "What is the no-show rate by appointment type?",
-        "Compare collection rates across different claim line statuses",
-        "What is the distribution of patient ages for high-risk patients?",
-        "Which payers have the lowest prior auth approval rates?",
-    ]
+    # ── Examples ─────────────────────────────────────────────────────────────
+    st.markdown("---")
+    st.markdown("#### \U0001f4a1 Click an example to load it")
+    sel = None
     cols = st.columns(2)
-    selected_example = None
-    for i, ex in enumerate(examples):
+    for i, ex in enumerate(EXAMPLES):
         with cols[i % 2]:
-            if st.button(f"💬 {ex[:60]}...", key=f"ex_{i}", use_container_width=True):
-                selected_example = ex
+            lbl = f"\U0001f4ac {ex[:58]}..." if len(ex)>58 else f"\U0001f4ac {ex}"
+            if st.button(lbl, key=f"ex_{i}", use_container_width=True):
+                sel = ex
 
+    # ── Query ─────────────────────────────────────────────────────────────────
     st.markdown("---")
+    question = st.text_area("Your Question", value=sel or "", height=80,
+                             placeholder="e.g. What is the total revenue by claim status?")
+    r1, r2 = st.columns([1, 4])
+    with r1: run = st.button("\U0001f680 Run", type="primary", use_container_width=True)
+    with r2: show_code = st.checkbox("Show generated code", False)
 
-    # ── Query input ───────────────────────────────────────────
-    question = st.text_area(
-        "Your Question",
-        value=selected_example or "",
-        height=80,
-        placeholder="e.g. What is the total revenue by claim status for the last 12 months?",
-    )
-
-    col_btn1, col_btn2 = st.columns([1,4])
-    with col_btn1:
-        run_btn = st.button("🚀 Run Query", type="primary", use_container_width=True)
-    with col_btn2:
-        show_code = st.checkbox("Show generated Python code", value=False)
-
-    if run_btn:
-        if not api_key or not api_key.startswith("sk-"):
-            st.error("Please enter a valid OpenAI API key above.")
-            st.stop()
-        if not question.strip():
-            st.error("Please enter a question.")
-            st.stop()
-
-        with st.spinner("🤔 AI is generating the query..."):
-            try:
-                generated_code = _call_openai(question, api_key)
-            except Exception as e:
-                st.error(f"OpenAI API error: {e}")
+    if run:
+        if not question.strip(): st.error("Enter a question."); st.stop()
+        if provider != "Ollama (Local)" and len(api_key or "") < 8:
+            st.error(f"Enter a valid {provider} API key."); st.stop()
+        with st.spinner(f"\U0001f914 {provider} — generating query..."):
+            try: code = _call_ai(question, provider, api_key, model, ollama_url)
+            except ImportError as e:
+                st.error(f"Missing package. Run: pip install {'anthropic' if 'anthropic' in str(e) else 'openai'}")
                 st.stop()
-
+            except Exception as e: st.error(f"{provider} error: {e}"); st.stop()
         if show_code:
-            st.markdown("#### 🔍 Generated Python Code")
-            st.code(generated_code, language="python")
-
-        chart_type = _extract_chart_type(generated_code)
-
-        with st.spinner("⚡ Running query against data..."):
+            st.markdown("#### \U0001f50d Generated Python Code"); st.code(code, language="python")
+        ct = _chart_type(code)
+        with st.spinner("\u26a1 Running query against data..."):
             try:
-                # Pre-load all relevant frames
-                col_map = {
-                    "claim_lines": ["billed_amount","paid_amount","allowed_amount","patient_responsibility",
-                                    "adjustment_amount","adjustment_reason_code","line_status","service_date","cpt_code","units"],
-                    "prior_authorizations": ["auth_id","status","service_type","payer_id","urgency","denial_reason",
-                                              "request_date","decision_date","approved_units"],
-                    "patients": ["patient_id","age","gender","race","state","smoking_status","bmi_category",
-                                 "income_bracket","employment_status"],
-                    "vitals": ["vital_id","systolic_bp","diastolic_bp","heart_rate","bmi","temperature_f","oxygen_saturation"],
+                frames = {
+                    "claim_lines": _silver("claim_lines",["billed_amount","paid_amount","allowed_amount",
+                        "patient_responsibility","adjustment_amount","adjustment_reason_code",
+                        "line_status","service_date","cpt_code","units"]),
+                    "prior_authorizations": _silver("prior_authorizations",["auth_id","status",
+                        "service_type","payer_id","urgency","denial_reason","request_date","decision_date"]),
+                    "patients": _silver("patients",["patient_id","age","gender","race","state",
+                        "smoking_status","bmi_category","income_bracket","employment_status"]),
+                    "vitals": _silver("vitals",["vital_id","systolic_bp","diastolic_bp","heart_rate",
+                        "bmi","temperature_f","oxygen_saturation"]),
+                    "kpi_procedure_revenue": _gold("kpi_procedure_revenue"),
+                    "kpi_appointment_ops":   _gold("kpi_appointment_ops"),
+                    "kpi_patient_risk":      _gold("kpi_patient_risk"),
                 }
-                frames = {}
-                for tbl, cols in col_map.items():
-                    frames[tbl] = _silver(tbl, cols)
-                frames["kpi_procedure_revenue"]  = _gold("kpi_procedure_revenue")
-                frames["kpi_appointment_ops"]    = _gold("kpi_appointment_ops")
-                frames["kpi_patient_risk"]       = _gold("kpi_patient_risk")
-
-                result = _safe_exec(generated_code, frames)
-
-                st.markdown("#### 📋 Query Results")
-                _auto_chart(result, chart_type, question)
-
+                result = _run_code(code, frames)
+                st.markdown("#### \U0001f4cb Results")
+                _render(result, ct, question)
             except Exception as e:
-                st.error(f"Query execution error: {e}")
-                st.markdown("**Generated code:**")
-                st.code(generated_code, language="python")
-                st.info("Try rephrasing your question or check the example queries above.")
+                import traceback
+                st.error(f"Execution error: {e}")
+                st.code(code, language="python")
+                st.info("Try rephrasing or choose a smarter model.")
 
-    # ── Schema Explorer ───────────────────────────────────────
-    with st.expander("📚 Data Schema Reference"):
-        for table, info in DATA_CATALOGUE.items():
-            st.markdown(f"**`{table}`** — {info['desc']}")
-            cols_df = pd.DataFrame(
-                [(c, d) for c, d in info["cols"].items()],
-                columns=["Column", "Description"]
-            )
-            st.dataframe(cols_df, use_container_width=True, hide_index=True, height=min(200, len(cols_df)*36+38))
-            st.markdown("")
+    with st.expander("\U0001f4da Available Data Schema"):
+        for tbl, desc in CATALOGUE.items():
+            st.markdown(f"**`{tbl}`** — {desc}")
