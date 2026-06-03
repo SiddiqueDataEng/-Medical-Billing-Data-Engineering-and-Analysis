@@ -2,9 +2,9 @@
 advanced_pages.py
 =================
 Three advanced dashboard pages:
-  1. Advanced Visuals  — sunburst, sankey, treemap, animated scatter, 3D surface, parallel coords
-  2. PDF Report        — dynamic report generation with header/footer, charts embedded
-  3. AI Ad-Hoc Query   — NLP -> pandas query -> auto chart selection
+  1. Advanced Visuals  - sunburst, sankey, treemap, animated scatter, 3D surface, parallel coords
+  2. PDF Report        - dynamic report generation with header/footer, charts embedded
+  3. AI Ad-Hoc Query   - NLP -> pandas query -> auto chart selection
 """
 import io, os, textwrap, datetime, base64
 import pandas as pd
@@ -82,9 +82,9 @@ def page_advanced_visuals():
 
     # ── TAB 1: SUNBURST ────────────────────────────────────────
     with tab1:
-        section("🌞 Revenue Sunburst — Billing Hierarchy")
+        section("🌞 Revenue Sunburst - Billing Hierarchy")
         story("A sunburst chart reveals the full hierarchy of your revenue: "
-              "from claim status → CPT code → line status → dollars. "
+              "from claim status -> CPT code -> line status -> dollars. "
               "Click any segment to drill down.")
 
         cl = _silver("claim_lines", ["billed_amount","paid_amount","allowed_amount",
@@ -118,7 +118,7 @@ def page_advanced_visuals():
                         "Paid":C["success"],"Denied":C["danger"],"Pending":C["warning"],
                         "Rejected":"#FF5722","Appealed":C["purple"],"Void":C["muted"],"Adjusted":C["teal"]
                     },
-                    title="Claim Status → CPT Code → Adjustment Code",
+                    title="Claim Status -> CPT Code -> Adjustment Code",
                     branchvalues="total",
                 )
                 fig.update_traces(textinfo="label+percent parent", insidetextfont=dict(size=11))
@@ -139,7 +139,7 @@ def page_advanced_visuals():
                         values="count",
                         color="age_group",
                         color_discrete_sequence=QUAL,
-                        title="Patient Population: Age Group → Gender → Smoking Status",
+                        title="Patient Population: Age Group -> Gender -> Smoking Status",
                         branchvalues="total",
                     )
                     fig2.update_traces(textinfo="label+percent parent", insidetextfont=dict(size=11))
@@ -162,7 +162,7 @@ def page_advanced_visuals():
                         "APPROVED":C["success"],"DENIED":C["danger"],
                         "PENDING":C["warning"],"EXPIRED":C["muted"],"APPEALED":C["purple"]
                     },
-                    title="Prior Auth: Status → Service Type → Urgency",
+                    title="Prior Auth: Status -> Service Type -> Urgency",
                     branchvalues="total",
                 )
                 fig3.update_traces(textinfo="label+percent parent")
@@ -172,7 +172,7 @@ def page_advanced_visuals():
     # ── TAB 2: SANKEY ──────────────────────────────────────────
     with tab2:
         section("🔀 Revenue Flow Sankey Diagram")
-        story("A Sankey diagram shows exactly how money flows through your revenue cycle — "
+        story("A Sankey diagram shows exactly how money flows through your revenue cycle - "
               "from gross billed, through contractual adjustments, to final payment status. "
               "Wider bands mean more dollars flowing through that path.")
 
@@ -239,13 +239,13 @@ def page_advanced_visuals():
 
     # ── TAB 3: TREEMAP ─────────────────────────────────────────
     with tab3:
-        section("🗺️ Revenue Treemap — Hierarchical Revenue by Category")
+        section("🗺️ Revenue Treemap - Hierarchical Revenue by Category")
         story("Treemaps show relative size at a glance. Larger rectangles = more revenue. "
-              "Colour intensity shows reimbursement rate — dark red means under-performing.")
+              "Colour intensity shows reimbursement rate - dark red means under-performing.")
 
         proc = _gold("kpi_procedure_revenue")
         if not proc.empty:
-            # Filter zero/null rows — these cause ZeroDivisionError in treemap weighted avg
+            # Filter zero/null rows - these cause ZeroDivisionError in treemap weighted avg
             proc2 = proc[(proc["total_paid"] > 0) & (proc["avg_reimbursement_rate_pct"].notna())].copy()
             proc2["avg_reimbursement_rate_pct"] = proc2["avg_reimbursement_rate_pct"].clip(0, 100)
             proc2["category"] = proc2["cpt_code"].apply(lambda x: (
@@ -262,7 +262,7 @@ def page_advanced_visuals():
                 color="avg_reimbursement_rate_pct",
                 color_continuous_scale="RdYlGn",
                 range_color=[30, 100],
-                title="Procedure Revenue Treemap — size=total paid, colour=reimbursement rate",
+                title="Procedure Revenue Treemap - size=total paid, colour=reimbursement rate",
             )
             fig.update_traces(textinfo="label+value", textfont_size=11,
                               marker_line_width=2, marker_line_color="#0A0D14")
@@ -273,7 +273,7 @@ def page_advanced_visuals():
         # Patient risk treemap
         risk = _gold("kpi_patient_risk")
         if not risk.empty:
-            section("Patient Risk Treemap — Population by BMI & Risk Tier")
+            section("Patient Risk Treemap - Population by BMI & Risk Tier")
             risk_grp = risk.groupby(["risk_tier","bmi_category","gender"]).agg(
                 count=("patient_id","count"),
                 avg_risk=("risk_score","mean"),
@@ -287,7 +287,7 @@ def page_advanced_visuals():
                 color="avg_risk",
                 color_continuous_scale="RdYlGn_r",
                 range_color=[0,80],
-                title="Patient Population — Risk Tier → BMI Category → Gender",
+                title="Patient Population - Risk Tier -> BMI Category -> Gender",
             )
             fig2.update_traces(textinfo="label+value", textfont_size=11,
                                marker_line_width=1, marker_line_color="#0A0D14")
@@ -300,7 +300,7 @@ def page_advanced_visuals():
         section("🎬 Animated Monthly Revenue Performance")
         story("Watch revenue metrics evolve month by month. "
               "Press Play to see how collection rate, denial rate, and volume change over time. "
-              "Each bubble is a CPT code — size = volume, colour = reimbursement rate.")
+              "Each bubble is a CPT code - size = volume, colour = reimbursement rate.")
 
         cl = _silver("claim_lines", ["billed_amount","paid_amount","allowed_amount","service_date","cpt_code"])
         if not cl.empty:
@@ -367,9 +367,9 @@ def page_advanced_visuals():
 
     # ── TAB 5: PARALLEL COORDINATES ────────────────────────────
     with tab5:
-        section("📐 Parallel Coordinates — Multi-Dimensional Patient Risk")
+        section("📐 Parallel Coordinates - Multi-Dimensional Patient Risk")
         story("Parallel coordinates show multiple dimensions simultaneously. "
-              "Each line is a patient segment. Brush any axis to filter — "
+              "Each line is a patient segment. Brush any axis to filter - "
               "this reveals which combinations of risk factors drive highest scores.")
 
         risk = _gold("kpi_patient_risk")
@@ -415,12 +415,12 @@ def page_advanced_visuals():
                 ],
             ))
             fig.update_layout(**CHART_LAYOUT, height=540,
-                              title=dict(text="Patient Risk — Multi-Dimensional Profile (brush to filter)", font_size=14))
+                              title=dict(text="Patient Risk - Multi-Dimensional Profile (brush to filter)", font_size=14))
             st.plotly_chart(fig, use_container_width=True)
 
     # ── TAB 6: 3D SURFACE ──────────────────────────────────────
     with tab6:
-        section("📊 3D Revenue Surface — Month × CPT × Collected")
+        section("📊 3D Revenue Surface - Month × CPT × Collected")
         story("A 3D surface reveals peaks and valleys in revenue across time and procedure type. "
               "Peaks are your revenue drivers. Valleys are opportunities. "
               "Rotate the chart to explore different angles.")
@@ -456,7 +456,7 @@ def page_advanced_visuals():
             ))
             fig.update_layout(
                 **CHART_LAYOUT, height=560,
-                title=dict(text="3D Revenue Surface — CPT Code × Month × Revenue ($K)", font_size=14),
+                title=dict(text="3D Revenue Surface - CPT Code × Month × Revenue ($K)", font_size=14),
                 scene=dict(
                     xaxis=dict(title="Month", tickvals=list(range(1,13)), ticktext=months,
                                gridcolor="#1E2740", color="#94A3B8"),
@@ -519,7 +519,7 @@ class MedBillingPDF(FPDF):
         self.line(15, self.get_y(), 195, self.get_y())
         self.set_font("Helvetica", "", 7)
         self.set_text_color(100, 116, 139)
-        self.cell(90, 6, "CONFIDENTIAL — Medical Billing Intelligence Platform", ln=0)
+        self.cell(90, 6, "CONFIDENTIAL - Medical Billing Intelligence Platform", ln=0)
         self.cell(90, 6, f"Page {self.page_no()} / {{nb}}", ln=0, align="R")
 
     def chapter_title(self, title, color=(59,130,246)):
@@ -609,7 +609,7 @@ class MedBillingPDF(FPDF):
 
 def page_pdf_report():
     st.markdown("# 📄 Dynamic PDF Report Generator")
-    st.markdown("*Generate a complete, branded revenue cycle report with charts, KPIs, and narrative — download as PDF*")
+    st.markdown("*Generate a complete, branded revenue cycle report with charts, KPIs, and narrative - download as PDF*")
     st.markdown("---")
 
     story("This report engine builds a professional PDF containing all key metrics, charts, and "
@@ -636,7 +636,7 @@ def page_pdf_report():
     gen_btn = st.button("🚀 Generate PDF Report", type="primary", use_container_width=True)
 
     if gen_btn:
-        with st.spinner("Building report — this takes ~15 seconds..."):
+        with st.spinner("Building report - this takes ~15 seconds..."):
             try:
                 # ── Load data ─────────────────────────────────
                 cl = _silver("claim_lines", ["billed_amount","paid_amount","allowed_amount",
@@ -729,7 +729,7 @@ def page_pdf_report():
                 pdf.cell(0,10,report_type,new_x="LMARGIN",new_y="NEXT",align="C")
                 pdf.set_font("Helvetica","",9)
                 pdf.set_text_color(100,116,139)
-                pdf.cell(0,6,f"Period: {period_start.strftime('%B %d, %Y')} — {period_end.strftime('%B %d, %Y')}",
+                pdf.cell(0,6,f"Period: {period_start.strftime('%B %d, %Y')} - {period_end.strftime('%B %d, %Y')}",
                          new_x="LMARGIN",new_y="NEXT",align="C")
                 pdf.cell(0,6,f"Prepared by: {prepared_by}  |  Confidential",
                          new_x="LMARGIN",new_y="NEXT",align="C")
@@ -757,7 +757,7 @@ def page_pdf_report():
                         f"{fmt_c(total_billed)} and collected {fmt_c(total_paid)}, achieving a collection rate of "
                         f"{coll_rate:.1f}%. The outstanding AR balance stands at {fmt_c(total_ar)}. "
                         f"The denial rate of {denial_rate:.1f}% "
-                        + ("exceeds the 10% benchmark — immediate denial management action is recommended." if denial_rate>10
+                        + ("exceeds the 10% benchmark - immediate denial management action is recommended." if denial_rate>10
                            else "is within the 10% industry benchmark.")
                         + f" Prior authorization approval rate is {auth_appr:.1f}%."
                     )
@@ -787,7 +787,7 @@ def page_pdf_report():
                 # Section 5: Top CPT Table
                 if include_tables:
                     pdf.add_page()
-                    pdf.chapter_title("5. Top 10 CPT Codes — Revenue Detail", color=(30,64,175))
+                    pdf.chapter_title("5. Top 10 CPT Codes - Revenue Detail", color=(30,64,175))
                     headers = ["CPT Code","Billed","Paid","Reimb. Rate","Volume"]
                     rows = []
                     for _, row in top_cpt.iterrows():
@@ -837,7 +837,7 @@ def page_pdf_report():
                 pdf_out = io.BytesIO(pdf_bytes if isinstance(pdf_bytes, bytes) else bytes(pdf_bytes))
 
                 fname = f"MedBilling_{report_type.replace(' ','_')}_{datetime.date.today()}.pdf"
-                st.success(f"✅ Report generated successfully — {pdf.page} pages")
+                st.success(f"✅ Report generated successfully - {pdf.page} pages")
                 st.download_button(
                     label=f"📥 Download {fname}",
                     data=pdf_out.getvalue(),
@@ -857,7 +857,7 @@ def page_pdf_report():
 
 
 # ════════════════════════════════════════════════════
-# PAGE 3 — AI AD-HOC QUERY ENGINE (Multi-Provider)
+# PAGE 3 - AI AD-HOC QUERY ENGINE (Multi-Provider)
 # ════════════════════════════════════════════════════
 
 CATALOGUE = {
@@ -891,7 +891,7 @@ SYS_PROMPT = (
     "1. Assign final result to: result\n"
     "2. For line_status normalise first: df['st']=df['line_status'].str.strip().str.title()\n"
     "3. Date columns: pd.to_datetime(df['col'], errors='coerce')\n"
-    "4. Return ONLY executable Python — no markdown fences, no explanations\n"
+    "4. Return ONLY executable Python - no markdown fences, no explanations\n"
     "5. Last line: # chart_type: bar|line|pie|scatter|table|histogram\n"
 )
 
@@ -903,10 +903,10 @@ PROVIDER_MODELS = {
 }
 
 PROVIDER_HELP = {
-    "Groq (Free)":    ("gsk_...", "console.groq.com", "Free tier available — fastest inference. Recommended for most users."),
+    "Groq (Free)":    ("gsk_...", "console.groq.com", "Free tier available - fastest inference. Recommended for most users."),
     "OpenAI":         ("sk-...", "platform.openai.com", "gpt-4o-mini is fast and cheap (~$0.0001/query). Highly accurate."),
     "Anthropic":      ("sk-ant-...", "console.anthropic.com", "Claude is excellent at reasoning. Haiku is cheapest."),
-    "Ollama (Local)": ("", "", "Runs fully locally — NO API key needed. Install ollama.com, pull a model, run 'ollama serve'."),
+    "Ollama (Local)": ("", "", "Runs fully locally - NO API key needed. Install ollama.com, pull a model, run 'ollama serve'."),
 }
 
 def _call_ai(question, provider, api_key, model, base_url=None):
@@ -979,10 +979,10 @@ def _render(res, ct, q):
 
 def page_ai_query():
     st.markdown("# \U0001f916 AI Ad-Hoc Query Engine")
-    st.markdown("*Ask anything in plain English — AI writes the query, runs it, and picks the best chart*")
+    st.markdown("*Ask anything in plain English - AI writes the query, runs it, and picks the best chart*")
     st.markdown("---")
     _story("No SQL or Python needed. Choose your AI provider, enter an optional API key, "
-           "pick a question or type your own. Groq is free and very fast — recommended for first-time users.")
+           "pick a question or type your own. Groq is free and very fast - recommended for first-time users.")
 
     # ── Provider row ─────────────────────────────────────────────────────────
     st.markdown("### \u2699\ufe0f AI Provider Configuration")
@@ -1001,7 +1001,7 @@ def page_ai_query():
     with c3:
         if provider == "Ollama (Local)":
             api_key = "local"
-            st.success("\u2705 No API key needed — runs locally")
+            st.success("\u2705 No API key needed - runs locally")
         else:
             api_key = st.text_input(f"{provider} API Key", type="password",
                                      placeholder=ph, help=f"Get key at {link}")
@@ -1035,7 +1035,7 @@ def page_ai_query():
         if not question.strip(): st.error("Enter a question."); st.stop()
         if provider != "Ollama (Local)" and len(api_key or "") < 8:
             st.error(f"Enter a valid {provider} API key."); st.stop()
-        with st.spinner(f"\U0001f914 {provider} — generating query..."):
+        with st.spinner(f"\U0001f914 {provider} - generating query..."):
             try: code = _call_ai(question, provider, api_key, model, ollama_url)
             except ImportError as e:
                 st.error(f"Missing package. Run: pip install {'anthropic' if 'anthropic' in str(e) else 'openai'}")
@@ -1071,4 +1071,4 @@ def page_ai_query():
 
     with st.expander("\U0001f4da Available Data Schema"):
         for tbl, desc in CATALOGUE.items():
-            st.markdown(f"**`{tbl}`** — {desc}")
+            st.markdown(f"**`{tbl}`** - {desc}")
