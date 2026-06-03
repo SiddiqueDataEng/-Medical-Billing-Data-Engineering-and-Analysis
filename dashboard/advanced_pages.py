@@ -245,8 +245,6 @@ def page_advanced_visuals():
 
         proc = _gold("kpi_procedure_revenue")
         if not proc.empty:
-        proc = _gold("kpi_procedure_revenue")
-        if not proc.empty:
             # Filter zero/null rows — these cause ZeroDivisionError in treemap weighted avg
             proc2 = proc[(proc["total_paid"] > 0) & (proc["avg_reimbursement_rate_pct"].notna())].copy()
             proc2["avg_reimbursement_rate_pct"] = proc2["avg_reimbursement_rate_pct"].clip(0, 100)
