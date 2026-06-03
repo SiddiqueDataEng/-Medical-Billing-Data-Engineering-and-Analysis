@@ -245,29 +245,29 @@ def page_advanced_visuals():
 
         proc = _gold("kpi_procedure_revenue")
         if not proc.empty:
-            proc["category"] = proc["cpt_code"].apply(lambda x: (
+        proc = _gold("kpi_procedure_revenue")
+        if not proc.empty:
+            # Filter zero/null rows — these cause ZeroDivisionError in treemap weighted avg
+            proc2 = proc[(proc["total_paid"] > 0) & (proc["avg_reimbursement_rate_pct"].notna())].copy()
+            proc2["avg_reimbursement_rate_pct"] = proc2["avg_reimbursement_rate_pct"].clip(0, 100)
+            proc2["category"] = proc2["cpt_code"].apply(lambda x: (
                 "Evaluation & Management" if str(x).startswith("99") else
                 "Radiology/Imaging"       if str(x).startswith("7") else
                 "Laboratory"              if str(x).startswith("8") else
                 "Surgery"                 if str(x).startswith(("2","3","4","5","6")) else
                 "Medicine/Other"
             ))
-            proc["label"] = proc["cpt_code"] + "<br>" + proc["procedure_description"].str[:20].fillna("")
-            fig = px.treemap(proc,
-                path=[px.Constant("All Procedures"),"category","label"],
+            proc2["label"] = proc2["cpt_code"] + " " + proc2["procedure_description"].str[:20].fillna("")
+            fig = px.treemap(proc2,
+                path=[px.Constant("All Procedures"), "category", "label"],
                 values="total_paid",
                 color="avg_reimbursement_rate_pct",
                 color_continuous_scale="RdYlGn",
-                range_color=[30,100],
-                hover_data={"total_billed":True,"total_paid":True,"utilization_count":True},
+                range_color=[30, 100],
                 title="Procedure Revenue Treemap — size=total paid, colour=reimbursement rate",
             )
-            fig.update_traces(
-                textinfo="label+value",
-                textfont_size=12,
-                marker_line_width=2,
-                marker_line_color="#0A0D14",
-            )
+            fig.update_traces(textinfo="label+value", textfont_size=11,
+                              marker_line_width=2, marker_line_color="#0A0D14")
             fig.update_layout(**CHART_LAYOUT, height=560,
                               coloraxis_colorbar=dict(title="Reimb. %"))
             st.plotly_chart(fig, use_container_width=True)
@@ -279,9 +279,10 @@ def page_advanced_visuals():
             risk_grp = risk.groupby(["risk_tier","bmi_category","gender"]).agg(
                 count=("patient_id","count"),
                 avg_risk=("risk_score","mean"),
-                avg_chronic=("chronic_condition_count","mean"),
             ).reset_index()
-            risk_grp = risk_grp[risk_grp["count"] >= 20]
+            # Filter zero/null to prevent ZeroDivisionError in weighted avg
+            risk_grp = risk_grp[(risk_grp["count"] >= 20) & (risk_grp["avg_risk"].notna())].copy()
+            risk_grp["avg_risk"] = risk_grp["avg_risk"].clip(0, 100)
             fig2 = px.treemap(risk_grp,
                 path=[px.Constant("All Patients"),"risk_tier","bmi_category","gender"],
                 values="count",
