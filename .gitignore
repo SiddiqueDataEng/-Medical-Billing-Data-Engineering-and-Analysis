@@ -6,8 +6,7 @@ __pycache__/
 .venv/
 venv/
 .pytest_cache/
-.vscode/
-.kiro/
+
 
 # Data files - too large for git
 raw_data/
@@ -26,7 +25,4 @@ airflow/fix_config.py
 *.db
 *.log
 *.zip
-GITHUBLIST.csv
-master-config.bat
-git-backdate.bat
-ROUGH.TXT
+
